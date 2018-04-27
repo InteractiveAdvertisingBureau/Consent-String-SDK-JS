@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: encode.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: encode.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const {
+  encodeToBase64,
+  padRight,
+} = require('./utils/bits');
+
+/**
+ * Encode a list of vendor IDs into bits
+ *
+ * @param {integer} maxVendorId Highest vendor ID in the vendor list
+ * @param {integer[]} allowedVendorIds Vendors that the user has given consent to
+ */
+function encodeVendorIdsToBits(maxVendorId, allowedVendorIds = []) {
+  let vendorString = '';
+
+  for (let id = 1; id &lt;= maxVendorId; id += 1) {
+    vendorString += (allowedVendorIds.indexOf(id) !== -1 ? '1' : '0');
+  }
+
+  return padRight(vendorString, Math.max(0, maxVendorId - vendorString.length));
+}
+
+/**
+ * Encode a list of purpose IDs into bits
+ *
+ * @param {*} purposes List of purposes from the vendor list
+ * @param {*} allowedPurposeIds List of purpose IDs that the user has given consent to
+ */
+function encodePurposeIdsToBits(purposes, allowedPurposeIds = new Set()) {
+  const maxPurposeId = Math.max(
+    0,
+    ...purposes.map(({ id }) => id),
+    ...Array.from(allowedPurposeIds),
+  );
+
+  let purposeString = '';
+
+  for (let id = 1; id &lt;= maxPurposeId; id += 1) {
+    purposeString += (allowedPurposeIds.indexOf(id) !== -1 ? '1' : '0');
+  }
+
+  return purposeString;
+}
+
+/**
+ * Convert a list of vendor IDs to ranges
+ *
+ * @param {object[]} vendors List of vendors from the vendor list
+ * @param {integer[]} allowedVendorIds List of vendor IDs that the user has given consent to
+ */
+function convertVendorsToRanges(vendors, allowedVendorIds) {
+  let range = [];
+
+  return vendors.reduce((acc, { id }, index) => {
+    if (allowedVendorIds.indexOf(id) !== -1) {
+      range.push(id);
+    }
+
+    // If the range has ended or at the end of vendors add entry to the list
+    if ((allowedVendorIds.indexOf(id) === -1 || index === vendors.length - 1) &amp;&amp; range.length) {
+      const startVendorId = range.shift();
+      const endVendorId = range.pop();
+
+      range = [];
+
+      return [...acc, {
+        isRange: typeof endVendorId === 'number',
+        startVendorId,
+        endVendorId,
+      }];
+    }
+
+    return acc;
+  }, []);
+}
+
+/**
+ * Encode consent data into a web-safe base64-encoded string
+ *
+ * @param {object} consentData Data to include in the string (see `utils/definitions.js` for the list of fields)
+ */
+function encodeConsentString(consentData) {
+  let { maxVendorId } = consentData;
+  const { vendorList = {}, allowedPurposeIds, allowedVendorIds } = consentData;
+  const { vendors = [], purposes = [] } = vendorList;
+
+  if (!maxVendorId) {
+    // Find the max vendor ID from the vendor list if it has not been provided
+    maxVendorId = 0;
+
+    vendors.forEach((vendor) => {
+      if (vendor.id > maxVendorId) {
+        maxVendorId = vendor.id;
+      }
+    });
+  }
+
+  // Encode the data with and without ranges and return the smallest encoded payload
+  const noRangesData = encodeToBase64({
+    ...consentData,
+    maxVendorId,
+    purposeIdBitString: encodePurposeIdsToBits(purposes, allowedPurposeIds),
+    isRange: false,
+    vendorIdBitString: encodeVendorIdsToBits(maxVendorId, allowedVendorIds),
+  });
+
+  const vendorRangeList = convertVendorsToRanges(vendors, allowedVendorIds);
+  const rangesData = encodeToBase64({
+    ...consentData,
+    maxVendorId,
+    purposeIdBitString: encodePurposeIdsToBits(purposes, allowedPurposeIds),
+    isRange: true,
+    defaultConsent: false,
+    numEntries: vendorRangeList.length,
+    vendorRangeList,
+  });
+
+  return noRangesData.length &lt; rangesData.length ? noRangesData : rangesData;
+}
+
+module.exports = {
+  encodeConsentString,
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ConsentString.html">ConsentString</a></li></ul><h3>Global</h3><ul><li><a href="global.html#consentLanguageRegexp">consentLanguageRegexp</a></li><li><a href="global.html#convertVendorsToRanges">convertVendorsToRanges</a></li><li><a href="global.html#decodeConsentString">decodeConsentString</a></li><li><a href="global.html#decodeFromBase64">decodeFromBase64</a></li><li><a href="global.html#encodeConsentString">encodeConsentString</a></li><li><a href="global.html#encodeDataToBits">encodeDataToBits</a></li><li><a href="global.html#encodePurposeIdsToBits">encodePurposeIdsToBits</a></li><li><a href="global.html#encodeToBase64">encodeToBase64</a></li><li><a href="global.html#encodeVendorIdsToBits">encodeVendorIdsToBits</a></li><li><a href="global.html#vendorVersionMap">vendorVersionMap</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Apr 07 2018 14:14:02 GMT-0400 (Eastern Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

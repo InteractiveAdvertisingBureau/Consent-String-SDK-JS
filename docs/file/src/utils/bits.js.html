@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/utils/bits.js | consent-string</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="Encode and decode web-safe base64 consent information with the IAB EU&apos;s GDPR Transparency and Consent Framework"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="consent-string"><meta property="twitter:description" content="Encode and decode web-safe base64 consent information with the IAB EU&apos;s GDPR Transparency and Consent Framework"></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/consent-string.js~ConsentString.html">ConsentString</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/utils/bits.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/* eslint no-use-before-define: off */
+
+const base64 = require(&apos;base-64&apos;);
+const {
+  NUM_BITS_VERSION,
+  vendorVersionMap,
+} = require(&apos;./definitions&apos;);
+
+function repeat(count, string = &apos;0&apos;) {
+  let padString = &apos;&apos;;
+
+  for (let i = 0; i &lt; count; i += 1) {
+    padString += string;
+  }
+
+  return padString;
+}
+
+function padLeft(string, padding) {
+  return repeat(Math.max(0, padding)) + string;
+}
+
+function padRight(string, padding) {
+  return string + repeat(Math.max(0, padding));
+}
+
+function encodeIntToBits(number, numBits) {
+  let bitString = &apos;&apos;;
+
+  if (typeof number === &apos;number&apos; &amp;&amp; !isNaN(number)) {
+    bitString = parseInt(number, 10).toString(2);
+  }
+
+  // Pad the string if not filling all bits
+  if (numBits &gt;= bitString.length) {
+    bitString = padLeft(bitString, numBits - bitString.length);
+  }
+
+  // Truncate the string if longer than the number of bits
+  if (bitString.length &gt; numBits) {
+    bitString = bitString.substring(0, numBits);
+  }
+
+  return bitString;
+}
+
+function encodeBoolToBits(value) {
+  return encodeIntToBits(value === true ? 1 : 0, 1);
+}
+
+function encodeDateToBits(date, numBits) {
+  if (date instanceof Date) {
+    return encodeIntToBits(date.getTime() / 100, numBits);
+  }
+  return encodeIntToBits(date, numBits);
+}
+
+function encodeLetterToBits(letter, numBits) {
+  return encodeIntToBits(letter.toUpperCase().charCodeAt(0) - 65, numBits);
+}
+
+function encodeLanguageToBits(language, numBits = 12) {
+  return encodeLetterToBits(language.slice(0, 1), numBits / 2)
+    + encodeLetterToBits(language.slice(1), numBits / 2);
+}
+
+function decodeBitsToInt(bitString, start, length) {
+  return parseInt(bitString.substr(start, length), 2);
+}
+
+function decodeBitsToDate(bitString, start, length) {
+  return new Date(decodeBitsToInt(bitString, start, length) * 100);
+}
+
+function decodeBitsToBool(bitString, start) {
+  return parseInt(bitString.substr(start, 1), 2) === 1;
+}
+
+function decodeBitsToLetter(bitString) {
+  const letterCode = decodeBitsToInt(bitString);
+  return String.fromCharCode(letterCode + 65).toLowerCase();
+}
+
+function decodeBitsToLanguage(bitString, start, length) {
+  const languageBitString = bitString.substr(start, length);
+
+  return decodeBitsToLetter(languageBitString.slice(0, length / 2))
+    + decodeBitsToLetter(languageBitString.slice(length / 2));
+}
+
+function encodeField({ input, field }) {
+  const { name, type, numBits, encoder, validator } = field;
+
+  if (typeof validator === &apos;function&apos;) {
+    if (!validator(input)) {
+      return &apos;&apos;;
+    }
+  }
+  if (typeof encoder === &apos;function&apos;) {
+    return encoder(input);
+  }
+
+  const bitCount = typeof numBits === &apos;function&apos; ? numBits(input) : numBits;
+
+  const inputValue = input[name];
+  const fieldValue = inputValue === null || inputValue === undefined ? &apos;&apos; : inputValue;
+
+  switch (type) {
+    case &apos;int&apos;:
+      return encodeIntToBits(fieldValue, bitCount);
+    case &apos;bool&apos;:
+      return encodeBoolToBits(fieldValue);
+    case &apos;date&apos;:
+      return encodeDateToBits(fieldValue, bitCount);
+    case &apos;bits&apos;:
+      return padRight(fieldValue, bitCount - fieldValue.length).substring(0, bitCount);
+    case &apos;list&apos;:
+      return fieldValue.reduce((acc, listValue) =&gt; acc + encodeFields({
+        input: listValue,
+        fields: field.fields,
+      }), &apos;&apos;);
+    case &apos;language&apos;:
+      return encodeLanguageToBits(fieldValue, bitCount);
+    default:
+      throw new Error(`ConsentString - Unknown field type ${type} for encoding`);
+  }
+}
+
+function encodeFields({ input, fields }) {
+  return fields.reduce((acc, field) =&gt; {
+    acc += encodeField({ input, field });
+
+    return acc;
+  }, &apos;&apos;);
+}
+
+function decodeField({ input, output, startPosition, field }) {
+  const { type, numBits, decoder, validator, listCount } = field;
+
+  if (typeof validator === &apos;function&apos;) {
+    if (!validator(output)) {
+      // Not decoding this field so make sure we start parsing the next field at
+      // the same point
+      return { newPosition: startPosition };
+    }
+  }
+
+  if (typeof decoder === &apos;function&apos;) {
+    return decoder(input, output, startPosition);
+  }
+
+  const bitCount = typeof numBits === &apos;function&apos; ? numBits(output) : numBits;
+
+  let listEntryCount = 0;
+  if (typeof listCount === &apos;function&apos;) {
+    listEntryCount = listCount(output);
+  } else if (typeof listCount === &apos;number&apos;) {
+    listEntryCount = listCount;
+  }
+
+  switch (type) {
+    case &apos;int&apos;:
+      return { fieldValue: decodeBitsToInt(input, startPosition, bitCount) };
+    case &apos;bool&apos;:
+      return { fieldValue: decodeBitsToBool(input, startPosition) };
+    case &apos;date&apos;:
+      return { fieldValue: decodeBitsToDate(input, startPosition, bitCount) };
+    case &apos;bits&apos;:
+      return { fieldValue: input.substr(startPosition, bitCount) };
+    case &apos;list&apos;:
+      return new Array(listEntryCount).fill().reduce((acc) =&gt; {
+        const { decodedObject, newPosition } = decodeFields({
+          input,
+          fields: field.fields,
+          startPosition: acc.newPosition,
+        });
+        return {
+          fieldValue: [...acc.fieldValue, decodedObject],
+          newPosition,
+        };
+      }, { fieldValue: [], newPosition: startPosition });
+    case &apos;language&apos;:
+      return { fieldValue: decodeBitsToLanguage(input, startPosition, bitCount) };
+    default:
+      throw new Error(`ConsentString - Unknown field type ${type} for decoding`);
+  }
+}
+
+function decodeFields({ input, fields, startPosition = 0 }) {
+  let position = startPosition;
+
+  const decodedObject = fields.reduce((acc, field) =&gt; {
+    const { name, numBits } = field;
+    const { fieldValue, newPosition } = decodeField({
+      input,
+      output: acc,
+      startPosition: position,
+      field,
+    });
+
+    if (fieldValue !== undefined) {
+      acc[name] = fieldValue;
+    }
+
+    if (newPosition !== undefined) {
+      position = newPosition;
+    } else if (typeof numBits === &apos;number&apos;) {
+      position += numBits;
+    }
+
+    return acc;
+  }, {});
+
+  return {
+    decodedObject,
+    newPosition: position,
+  };
+}
+
+/**
+ * Encode the data properties to a bit string. Encoding will encode
+ * either `selectedVendorIds` or the `vendorRangeList` depending on
+ * the value of the `isRange` flag.
+ */
+function encodeDataToBits(data, definitionMap) {
+  const { version } = data;
+
+  if (typeof version !== &apos;number&apos;) {
+    throw new Error(&apos;ConsentString - No version field to encode&apos;);
+  } else if (!definitionMap[version]) {
+    throw new Error(`ConsentString - No definition for version ${version}`);
+  } else {
+    const fields = definitionMap[version].fields;
+    return encodeFields({ input: data, fields });
+  }
+}
+
+/**
+ * Take all fields required to encode the consent string and produce the URL safe Base64 encoded value
+ */
+function encodeToBase64(data, definitionMap = vendorVersionMap) {
+  const binaryValue = encodeDataToBits(data, definitionMap);
+
+  if (binaryValue) {
+    // Pad length to multiple of 8
+    const paddedBinaryValue = padRight(binaryValue, 7 - ((binaryValue.length + 7) % 8));
+
+    // Encode to bytes
+    let bytes = &apos;&apos;;
+    for (let i = 0; i &lt; paddedBinaryValue.length; i += 8) {
+      bytes += String.fromCharCode(parseInt(paddedBinaryValue.substr(i, 8), 2));
+    }
+
+    // Make base64 string URL friendly
+    return base64.encode(bytes)
+      .replace(/\+/g, &apos;-&apos;)
+      .replace(/\//g, &apos;_&apos;)
+      .replace(/=+$/, &apos;&apos;);
+  }
+
+  return null;
+}
+
+function decodeConsentStringBitValue(bitString, definitionMap = vendorVersionMap) {
+  const version = decodeBitsToInt(bitString, 0, NUM_BITS_VERSION);
+
+  if (typeof version !== &apos;number&apos;) {
+    return {};
+  } else if (!vendorVersionMap[version]) {
+    return {};
+  }
+
+  const fields = definitionMap[version].fields;
+  const { decodedObject } = decodeFields({ input: bitString, fields });
+
+  return decodedObject;
+}
+
+/**
+ * Decode the (URL safe Base64) value of a consent string into an object.
+ */
+function decodeFromBase64(consentString, definitionMap) {
+  // Add padding
+  let unsafe = consentString;
+  while (unsafe.length % 4 !== 0) {
+    unsafe += &apos;=&apos;;
+  }
+
+  // Replace safe characters
+  unsafe = unsafe
+    .replace(/-/g, &apos;+&apos;)
+    .replace(/_/g, &apos;/&apos;);
+
+  const bytes = base64.decode(unsafe);
+
+  let inputBits = &apos;&apos;;
+  for (let i = 0; i &lt; bytes.length; i += 1) {
+    const bitString = bytes.charCodeAt(i).toString(2);
+    inputBits += padLeft(bitString, 8 - bitString.length);
+  }
+
+  return decodeConsentStringBitValue(inputBits, definitionMap);
+}
+
+function decodeBitsToIds(bitString) {
+  return bitString.split(&apos;&apos;).reduce((acc, bit, index) =&gt; {
+    if (bit === &apos;1&apos;) {
+      if (acc.indexOf(index + 1) === -1) {
+        acc.push(index + 1);
+      }
+    }
+    return acc;
+  }, []);
+}
+
+module.exports = {
+  padRight,
+  padLeft,
+  encodeField,
+  encodeDataToBits,
+  encodeIntToBits,
+  encodeBoolToBits,
+  encodeDateToBits,
+  encodeLanguageToBits,
+  encodeLetterToBits,
+  encodeToBase64,
+  decodeBitsToIds,
+  decodeBitsToInt,
+  decodeBitsToDate,
+  decodeBitsToBool,
+  decodeBitsToLanguage,
+  decodeBitsToLetter,
+  decodeFromBase64,
+};
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.0.4)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
