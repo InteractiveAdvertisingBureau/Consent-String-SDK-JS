@@ -321,7 +321,7 @@ class ConsentString {
       }
     } else if (value === false) {
       if (vendorIndex !== -1) {
-        this.allowedVendorIds.splice(vendorIndex);
+        this.allowedVendorIds.splice(vendorIndex, 1);
       }
     }
   }
