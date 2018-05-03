@@ -272,7 +272,7 @@ class ConsentString {
       }
     } else if (value === false) {
       if (purposeIndex !== -1) {
-        this.allowedPurposeIds.splice(purposeIndex);
+        this.allowedPurposeIds.splice(purposeIndex, 1);
       }
     }
   }
