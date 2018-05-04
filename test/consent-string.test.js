@@ -36,6 +36,34 @@ describe('ConsentString', function () {
     expect(new ConsentString(consentString.getConsentString(false))).to.deep.include(consentData);
   });
 
+  describe('vendorPermissions', function () {
+    it('can manipulate one vendor permission without affecting the others', function () {
+      const consentString = new ConsentString();
+      consentString.setGlobalVendorList(vendorList);
+      Object.assign(consentString, consentData);
+
+      const allowedVendorsBefore = consentString.allowedVendorIds.slice();
+
+      consentString.setVendorAllowed(2, false);
+
+      expect(allowedVendorsBefore.length - 1).to.equal(consentString.allowedVendorIds.length);
+    });
+  });
+
+  describe('purposePermissions', function () {
+    it('can manipulate one purpose permission without affecting the others', function () {
+      const consentString = new ConsentString();
+      consentString.setGlobalVendorList(vendorList);
+      Object.assign(consentString, consentData);
+
+      const allowedPurposes = consentString.allowedPurposeIds.slice();
+
+      consentString.setPurposeAllowed(1, false);
+
+      expect(allowedPurposes.length - 1).to.equal(consentString.allowedPurposeIds.length);
+    });
+  });
+
   describe('setGlobalVendorList', function () {
     it('throws an error if the provided vendor list does not respect the IAB format', function () {
       expect(() => (new ConsentString()).setGlobalVendorList()).to.throw;
