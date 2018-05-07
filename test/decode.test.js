@@ -1,7 +1,5 @@
 const { expect } = require('chai');
 
-const vendorList = require('./vendors.json');
-
 const { decodeConsentString } = require('../src/decode');
 
 describe('decode', function () {
@@ -17,7 +15,7 @@ describe('decode', function () {
       consentScreen: 3,
       consentLanguage: 'en',
       vendorListVersion: 1,
-      maxVendorId: vendorList.vendors[vendorList.vendors.length - 1].id,
+      maxVendorId: 1171,
       created: aDate,
       lastUpdated: aDate,
       allowedPurposeIds: [1, 2],

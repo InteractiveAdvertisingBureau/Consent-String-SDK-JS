@@ -14,19 +14,12 @@ describe('ConsentString', function () {
     consentScreen: 3,
     consentLanguage: 'en',
     vendorListVersion: 1,
-    maxVendorId: vendorList.vendors[vendorList.vendors.length - 1].id,
+    maxVendorId: Math.max(...vendorList.vendors.map(vendor => vendor.id)),
     created: aDate,
     lastUpdated: aDate,
     allowedPurposeIds: [1, 2],
     allowedVendorIds: [1, 2, 4],
   };
-
-  it('gives the same result when decoding then encoding data with no changes', function () {
-    const encodedConsentString = 'BOQ7WlgOQ7WlgABACDENABwAAABJOACgACAAQABA';
-    const consentString = new ConsentString(encodedConsentString);
-    consentString.setGlobalVendorList(vendorList);
-    expect(consentString.getConsentString(false)).to.equal(encodedConsentString);
-  });
 
   it('gives the same result when encoding then decoding data', function () {
     const consentString = new ConsentString();
@@ -104,6 +97,24 @@ describe('ConsentString', function () {
       })).to.be.undefined;
 
       expect(consent.vendorListVersion).to.equal(1);
+    });
+
+    it('sorts the vendor list by ID', function () {
+      const consent = new ConsentString();
+
+      consent.setGlobalVendorList({
+        vendorListVersion: 1,
+        purposes: [],
+        vendors: [
+          { id: 2 },
+          { id: 1 },
+        ],
+      });
+
+      expect(consent.vendorList.vendors).to.deep.equal([
+        { id: 1 },
+        { id: 2 },
+      ]);
     });
   });
 });

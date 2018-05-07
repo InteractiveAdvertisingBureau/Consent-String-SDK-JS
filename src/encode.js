@@ -44,19 +44,28 @@ function encodePurposeIdsToBits(purposes, allowedPurposeIds = new Set()) {
 /**
  * Convert a list of vendor IDs to ranges
  *
- * @param {object[]} vendors List of vendors from the vendor list
+ * @param {object[]} vendors List of vendors from the vendor list (important: this list must to be sorted by ID)
  * @param {integer[]} allowedVendorIds List of vendor IDs that the user has given consent to
  */
 function convertVendorsToRanges(vendors, allowedVendorIds) {
   let range = [];
+
+  const idsInList = vendors.map(vendor => vendor.id);
 
   return vendors.reduce((acc, { id }, index) => {
     if (allowedVendorIds.indexOf(id) !== -1) {
       range.push(id);
     }
 
-    // If the range has ended or at the end of vendors add entry to the list
-    if ((allowedVendorIds.indexOf(id) === -1 || index === vendors.length - 1) && range.length) {
+    // Do we need to close the current range?
+    if (
+      (
+        allowedVendorIds.indexOf(id) === -1 // The vendor we are evaluating is not allowed
+        || index === vendors.length - 1 // There is no more vendor to evaluate
+        || idsInList.indexOf(id + 1) === -1 // There is no vendor after this one (ie there is a gap in the vendor IDs) ; we need to stop here to avoid including vendors that do not have consent
+      )
+      && range.length
+    ) {
       const startVendorId = range.shift();
       const endVendorId = range.pop();
 
@@ -104,6 +113,7 @@ function encodeConsentString(consentData) {
   });
 
   const vendorRangeList = convertVendorsToRanges(vendors, allowedVendorIds);
+
   const rangesData = encodeToBase64({
     ...consentData,
     maxVendorId,
@@ -118,5 +128,6 @@ function encodeConsentString(consentData) {
 }
 
 module.exports = {
+  convertVendorsToRanges,
   encodeConsentString,
 };
