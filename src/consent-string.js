@@ -153,7 +153,19 @@ class ConsentString {
       throw new Error('ConsentString - The provided vendor list does not respect the schema from the IAB EU’s GDPR Consent and Transparency Framework');
     }
 
-    this.vendorList = vendorList;
+    // Cloning the GVL
+    // It's important as we might transform it and don't want to modify objects that we do not own
+    this.vendorList = {
+      vendorListVersion: vendorList.vendorListVersion,
+      lastUpdated: vendorList.lastUpdated,
+      purposes: vendorList.purposes,
+      features: vendorList.features,
+
+      // Clone the list and sort the vendors by ID (it breaks our range generation algorithm if they are not sorted)
+      vendors: vendorList.vendors
+        .slice(0)
+        .sort((firstVendor, secondVendor) => (firstVendor.id < secondVendor.id ? -1 : 1)),
+    };
     this.vendorListVersion = vendorList.vendorListVersion;
   }
 
