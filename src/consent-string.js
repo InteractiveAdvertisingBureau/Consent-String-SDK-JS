@@ -297,7 +297,7 @@ class ConsentString {
    * @return {boolean}
    */
   isPurposeAllowed(purposeId) {
-    return this.purposes.indexOf(purposeId) !== -1;
+    return this.allowedPurposeIds.indexOf(purposeId) !== -1;
   }
 
   /**
