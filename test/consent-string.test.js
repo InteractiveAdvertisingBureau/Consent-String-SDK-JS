@@ -55,6 +55,16 @@ describe('ConsentString', function () {
 
       expect(allowedPurposes.length - 1).to.equal(consentString.allowedPurposeIds.length);
     });
+
+    it("shouldn't throw an error when calling isPurposeAllowed", function() {
+      const consentString = new ConsentString();
+      consentString.setGlobalVendorList(vendorList);
+      Object.assign(consentString, consentData);
+
+      consentString.setPurposeAllowed(1, true);
+
+      expect(consentString.isPurposeAllowed(1)).to.be.true;
+    });
   });
 
   describe('setGlobalVendorList', function () {
