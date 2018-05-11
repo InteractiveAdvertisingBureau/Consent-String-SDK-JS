@@ -150,7 +150,7 @@ writeCookieValue(consentData.getConsentString());
 
 ## Documentation
 
-### constructor
+#### constructor
 Constructs new object
 
 ```javascript
@@ -159,7 +159,7 @@ constructor( str = null )
 ```
 ---
 
-### getConsentString()
+#### getConsentString()
 Gets the consent string either new one created or one passed in on construction.
 ```javascript
 // @return web-safe base64 encoded consent string
@@ -168,7 +168,7 @@ getConsentString()
 
 
 ---
-### getMetadataString()
+#### getMetadataString()
 Gets the metadata string as defined in the response to the getVendorConsents method (ie binary string that includes only header information like consent string version, timestamps, cmp ID, etc. but no purposes/consents information).
 
 ```javascript
@@ -176,7 +176,7 @@ Gets the metadata string as defined in the response to the getVendorConsents met
 getMetadataString()
 ```
 ---
-### getVersion()
+#### getVersion()
 The version number in which this consent string specification adheres to
 
 ```javascript
@@ -185,7 +185,7 @@ getVersion()
 ```
 
 ---
-### getVendorListVersion()
+#### getVendorListVersion()
 Returns either the vendor list version set by `setGlobalVendorList` or whatever was previously set as the consent string when the object was created
 
 ```javascript
@@ -193,7 +193,7 @@ Returns either the vendor list version set by `setGlobalVendorList` or whatever 
 getVendorListVersion()
 ```
 ---
-### setGlobalVendorList( gvlObject )
+#### setGlobalVendorList( gvlObject )
 Sets the global vendor list object.  Generally this would be the parsed JSON that comes from the IAB hosted Global Vendor List.
 
 ```javascript
@@ -201,7 +201,7 @@ Sets the global vendor list object.  Generally this would be the parsed JSON tha
 setGlobalVendorList( gvlObject )
 ```
 ---
-### setCmpId( cmpId )
+#### setCmpId( cmpId )
 Sets CMP ID number that is assigned to your CMP from the IAB EU.  A unique ID will be assigned to each Consent Manager Provider
 
 ```javascript
@@ -209,7 +209,7 @@ Sets CMP ID number that is assigned to your CMP from the IAB EU.  A unique ID wi
 setCmpId( cmpId )
 ```
 ---
-### getCmpId()
+#### getCmpId()
 Get the ID of the CMP from the consent string
 
 ```javascript
@@ -217,7 +217,7 @@ Get the ID of the CMP from the consent string
 getCmpId()
 ```
 ---
-### setCmpVersion( version )
+#### setCmpVersion( version )
 Sets the version of the CMP code that created or updated the consent string
 
 ```javascript
@@ -225,7 +225,7 @@ Sets the version of the CMP code that created or updated the consent string
 setCmpVersion( version )
 ```
 ---
-### getCmpVersion()
+#### getCmpVersion()
 The version of the CMP code that created or updated the consent string
 
 ```javascript
@@ -233,7 +233,7 @@ The version of the CMP code that created or updated the consent string
 getCmpVersion()
 ```
 ---
-### setConsentScreen( screenId )
+#### setConsentScreen( screenId )
 Sets the consent screen id.  The screen number is CMP and CMP Version specific, and is for logging proof of consent
 
 ```javascript
@@ -241,7 +241,7 @@ Sets the consent screen id.  The screen number is CMP and CMP Version specific, 
 setConsentScreen( screenId )
 ```
 ---
-### getConsentScreen()
+#### getConsentScreen()
 The screen number is CMP and CmpVersion specific, and is for logging proof of consent
 
 ```javascript
@@ -249,7 +249,7 @@ The screen number is CMP and CmpVersion specific, and is for logging proof of co
 getConsentScreen()
 ```
 ---
-### setConsentLanguage( language ) 
+#### setConsentLanguage( language ) 
 Sets consent language. Two-letter ISO639-1 language code that CMP asked for consent in
 
 ```javascript
@@ -257,7 +257,7 @@ Sets consent language. Two-letter ISO639-1 language code that CMP asked for cons
 setConsentLanguage( language )
 ```
 ---
-### getConsentLanguage()
+#### getConsentLanguage()
 gets consent language. Two-letter ISO639-1 language code that CMP asked for consent in
 
 ```javascript
@@ -265,7 +265,7 @@ gets consent language. Two-letter ISO639-1 language code that CMP asked for cons
 getConsentLanguage()
 ```
 ---
-### setPurposesAllowed( purposeIdArray)
+#### setPurposesAllowed( purposeIdArray)
 Sets the allowed purposes as an array of purpose ids
 
 ```javascript
@@ -273,7 +273,7 @@ Sets the allowed purposes as an array of purpose ids
 setPurposesAllowed( purposeIdArray)
 ```
 ---
-### getPurposesAllowed()
+#### getPurposesAllowed()
 Gets an array of purposes allowed either set by `setPurposesAllowed` or whatever was previously set by the initializing consent string
 
 ```javascript
@@ -281,7 +281,7 @@ Gets an array of purposes allowed either set by `setPurposesAllowed` or whatever
 getPurposesAllowed()
 ```
 ---
-### setPurposeAllowed( purposeId, value )
+#### setPurposeAllowed( purposeId, value )
 Sets a single purpose by id and boolean value
 
 ```javascript
@@ -290,7 +290,7 @@ Sets a single purpose by id and boolean value
 setPurposeAllowed( purposeId, value )
 ```
 ---
-### isPurposeAllowed( purposeId ) 
+#### isPurposeAllowed( purposeId ) 
 Gets a single purpose by id and returns boolean value
 
 ```javascript
@@ -299,7 +299,7 @@ Gets a single purpose by id and returns boolean value
 isPurposeAllowed( purposeId )
 ```
 ---
-### setVendorAllowed( vendorId, valueBool ) 
+#### setVendorAllowed( vendorId, valueBool ) 
 Sets consent value for a vendor id
 
 ```javascript
@@ -308,7 +308,7 @@ Sets consent value for a vendor id
 setVendorAllowed( vendorId, valueBool )
 ```
 ---
-### isVendorAllowed( vendorId ) 
+#### isVendorAllowed( vendorId ) 
 For determining if the vendor consent value bit is turned on or off for a particular vendor id.
 
 ```javascript
