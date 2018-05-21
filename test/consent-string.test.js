@@ -29,6 +29,20 @@ describe('ConsentString', function () {
     expect(new ConsentString(consentString.getConsentString(false))).to.deep.include(consentData);
   });
 
+  it('has a getMetadataString method and decodeMetadaString static method', function () {
+    const consentString = new ConsentString();
+    consentString.setGlobalVendorList(vendorList);
+    Object.assign(consentString, consentData);
+    const result = ConsentString.decodeMetadataString(consentString.getMetadataString());
+    expect(result.cmpId).to.equal(consentData.cmpId);
+    expect(result.cmpVersion).to.equal(consentData.cmpVersion);
+    expect(result.version).to.equal(consentData.version);
+    expect(result.vendorListVersion).to.equal(consentData.vendorListVersion);
+    expect(result.created.toString()).to.equal(consentData.created.toString());
+    expect(result.lastUpdated.toString()).to.equal(consentData.lastUpdated.toString());
+    expect(result.consentScreen).to.equal(consentData.consentScreen);
+  });
+
   describe('vendorPermissions', function () {
     it('can manipulate one vendor permission without affecting the others', function () {
       const consentString = new ConsentString();

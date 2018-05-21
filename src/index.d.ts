@@ -34,7 +34,9 @@ declare class ConsentString {
   private allowedPurposeIds: number[];
   private allowedVendorIds: number[];
 
+  static decodeMetadataString(encodedMetadata:string): object;
   public getConsentString(updateDate?:boolean): string;
+  public getMetadataString(): string;
   public getVersion(): number;
   public getVendorListVersion(): number;
   public setGlobalVendorList(vendorList: VendorList): void;
@@ -54,4 +56,5 @@ declare class ConsentString {
   getVendorsAllowed(): number[];
   setVendorAllowed(vendorId: number, value: boolean): void;
   isVendorAllowed(vendorId: number): boolean;
+  getStringFieds(needAllFields: boolean): object;
 }

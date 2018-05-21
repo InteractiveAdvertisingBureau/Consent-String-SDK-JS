@@ -176,6 +176,15 @@ Gets the metadata string as defined in the response to the getVendorConsents met
 getMetadataString()
 ```
 ---
+
+#### ConsentString.decodeMetadataString() (Static Method)
+Decodes the metadata string.
+
+```javascript
+// @return object with metadata fields 
+ConsentString.decodeMetadataString(encodedMetadataString)
+```
+---
 #### getVersion()
 The version number in which this consent string specification adheres to
 

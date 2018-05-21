@@ -1,5 +1,6 @@
 const { encodeConsentString } = require('./encode');
 const { decodeConsentString } = require('./decode');
+const { vendorVersionMap } = require('./utils/definitions');
 
 /**
  * Regular expression for validating
@@ -98,20 +99,33 @@ class ConsentString {
     if (updateDate === true) {
       this.lastUpdated = new Date();
     }
+    const fields = this.getStringFields(true);
+    return encodeConsentString(fields);
+  }
 
-    return encodeConsentString({
-      version: this.getVersion(),
-      vendorList: this.vendorList,
-      allowedPurposeIds: this.allowedPurposeIds,
-      allowedVendorIds: this.allowedVendorIds,
-      created: this.created,
-      lastUpdated: this.lastUpdated,
-      cmpId: this.cmpId,
-      cmpVersion: this.cmpVersion,
-      consentScreen: this.consentScreen,
-      consentLanguage: this.consentLanguage,
-      vendorListVersion: this.vendorListVersion,
-    });
+  /**
+   * Get the web-safe, base64-encoded metadata string
+   *
+   * @return {string} Web-safe, base64-encoded metadata string
+   */
+  getMetadataString() {
+    const fields = this.getStringFields(false);
+    return encodeConsentString(fields);
+  }
+
+  /**
+   * Decode the web-safe, base64-encoded metadata string
+   * @param {string} encodedMetadata Web-safe, base64-encoded metadata string
+   * @return {object} decoded metadata
+   */
+  static decodeMetadataString(encodedMetadata) {
+    const decodedString = decodeConsentString(encodedMetadata);
+    const metadata = {};
+    vendorVersionMap[decodedString.version]
+      .metadataFields.forEach((field) => {
+        metadata[field] = decodedString[field];
+      });
+    return metadata;
   }
 
   /**
@@ -347,6 +361,34 @@ class ConsentString {
    */
   isVendorAllowed(vendorId) {
     return this.allowedVendorIds.indexOf(vendorId) !== -1;
+  }
+
+  /**
+   * Build fields for getConsentString or getMetadataString
+   *
+   * @param {boolean} needAllFields - true to return all fields, false
+   * for just metadata fields
+   * @return {object}
+   */
+  getStringFields(needAllFields) {
+    const fields = {
+      version: this.getVersion(),
+      created: this.created,
+      lastUpdated: this.lastUpdated,
+      cmpId: this.cmpId,
+      cmpVersion: this.cmpVersion,
+      consentScreen: this.consentScreen,
+      vendorListVersion: this.vendorListVersion,
+    };
+    if (needAllFields) {
+      return Object.assign(fields, {
+        vendorList: this.vendorList,
+        allowedPurposeIds: this.allowedPurposeIds,
+        allowedVendorIds: this.allowedVendorIds,
+        consentLanguage: this.consentLanguage,
+      });
+    }
+    return fields;
   }
 }
 
