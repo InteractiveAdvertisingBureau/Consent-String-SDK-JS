@@ -1,5 +1,6 @@
 const { encodeConsentString } = require('./encode');
 const { decodeConsentString } = require('./decode');
+const { vendorVersionMap } = require('./utils/definitions');
 
 /**
  * Regular expression for validating
@@ -112,6 +113,38 @@ class ConsentString {
       consentLanguage: this.consentLanguage,
       vendorListVersion: this.vendorListVersion,
     });
+  }
+
+  /**
+   * Get the web-safe, base64-encoded metadata string
+   *
+   * @return {string} Web-safe, base64-encoded metadata string
+   */
+  getMetadataString() {
+    return encodeConsentString({
+      version: this.getVersion(),
+      created: this.created,
+      lastUpdated: this.lastUpdated,
+      cmpId: this.cmpId,
+      cmpVersion: this.cmpVersion,
+      consentScreen: this.consentScreen,
+      vendorListVersion: this.vendorListVersion,
+    });
+  }
+
+  /**
+   * Decode the web-safe, base64-encoded metadata string
+   * @param {string} encodedMetadata Web-safe, base64-encoded metadata string
+   * @return {object} decoded metadata
+   */
+  static decodeMetadataString(encodedMetadata) {
+    const decodedString = decodeConsentString(encodedMetadata);
+    const metadata = {};
+    vendorVersionMap[decodedString.version]
+      .metadataFields.forEach((field) => {
+        metadata[field] = decodedString[field];
+      });
+    return metadata;
   }
 
   /**

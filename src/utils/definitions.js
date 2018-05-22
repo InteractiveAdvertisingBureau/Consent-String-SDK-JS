@@ -15,6 +15,8 @@ const vendorVersionMap = {
    */
   1: {
     version: 1,
+    metadataFields: ['version', 'created', 'lastUpdated', 'cmpId',
+      'cmpVersion', 'consentScreen', 'vendorListVersion'],
     fields: [
       { name: 'version', type: 'int', numBits: 6 },
       { name: 'created', type: 'date', numBits: 36 },
