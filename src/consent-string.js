@@ -99,8 +99,20 @@ class ConsentString {
     if (updateDate === true) {
       this.lastUpdated = new Date();
     }
-    const fields = this.getStringFields(true);
-    return encodeConsentString(fields);
+
+    return encodeConsentString({
+      version: this.getVersion(),
+      vendorList: this.vendorList,
+      allowedPurposeIds: this.allowedPurposeIds,
+      allowedVendorIds: this.allowedVendorIds,
+      created: this.created,
+      lastUpdated: this.lastUpdated,
+      cmpId: this.cmpId,
+      cmpVersion: this.cmpVersion,
+      consentScreen: this.consentScreen,
+      consentLanguage: this.consentLanguage,
+      vendorListVersion: this.vendorListVersion,
+    });
   }
 
   /**
@@ -109,8 +121,15 @@ class ConsentString {
    * @return {string} Web-safe, base64-encoded metadata string
    */
   getMetadataString() {
-    const fields = this.getStringFields(false);
-    return encodeConsentString(fields);
+    return encodeConsentString({
+      version: this.getVersion(),
+      created: this.created,
+      lastUpdated: this.lastUpdated,
+      cmpId: this.cmpId,
+      cmpVersion: this.cmpVersion,
+      consentScreen: this.consentScreen,
+      vendorListVersion: this.vendorListVersion,
+    });
   }
 
   /**
@@ -361,34 +380,6 @@ class ConsentString {
    */
   isVendorAllowed(vendorId) {
     return this.allowedVendorIds.indexOf(vendorId) !== -1;
-  }
-
-  /**
-   * Build fields for getConsentString or getMetadataString
-   *
-   * @param {boolean} needAllFields - true to return all fields, false
-   * for just metadata fields
-   * @return {object}
-   */
-  getStringFields(needAllFields) {
-    const fields = {
-      version: this.getVersion(),
-      created: this.created,
-      lastUpdated: this.lastUpdated,
-      cmpId: this.cmpId,
-      cmpVersion: this.cmpVersion,
-      consentScreen: this.consentScreen,
-      vendorListVersion: this.vendorListVersion,
-    };
-    if (needAllFields) {
-      return Object.assign(fields, {
-        vendorList: this.vendorList,
-        allowedPurposeIds: this.allowedPurposeIds,
-        allowedVendorIds: this.allowedVendorIds,
-        consentLanguage: this.consentLanguage,
-      });
-    }
-    return fields;
   }
 }
 

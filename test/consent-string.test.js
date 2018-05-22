@@ -21,6 +21,8 @@ describe('ConsentString', function () {
     allowedVendorIds: [1, 2, 4],
   };
 
+  const resultingMetadaString = 'BOQ7WlgOQ7WlgABACDAAABAAAAAAAA';
+
   it('gives the same result when encoding then decoding data', function () {
     const consentString = new ConsentString();
     consentString.setGlobalVendorList(vendorList);
@@ -29,17 +31,21 @@ describe('ConsentString', function () {
     expect(new ConsentString(consentString.getConsentString(false))).to.deep.include(consentData);
   });
 
-  it('has a getMetadataString method and decodeMetadaString static method', function () {
+  it('encodes the Metadata String as expected', function () {
     const consentString = new ConsentString();
     consentString.setGlobalVendorList(vendorList);
     Object.assign(consentString, consentData);
-    const result = ConsentString.decodeMetadataString(consentString.getMetadataString());
+    expect(consentString.getMetadataString()).to.equal(resultingMetadaString);
+  });
+
+  it('decodes the Metadata String as expected', function () {
+    const result = ConsentString.decodeMetadataString(resultingMetadaString);
     expect(result.cmpId).to.equal(consentData.cmpId);
     expect(result.cmpVersion).to.equal(consentData.cmpVersion);
     expect(result.version).to.equal(consentData.version);
     expect(result.vendorListVersion).to.equal(consentData.vendorListVersion);
-    expect(result.created.toString()).to.equal(consentData.created.toString());
-    expect(result.lastUpdated.toString()).to.equal(consentData.lastUpdated.toString());
+    expect(result.created).to.deep.equal(consentData.created);
+    expect(result.lastUpdated).to.deep.equal(consentData.lastUpdated);
     expect(result.consentScreen).to.equal(consentData.consentScreen);
   });
 

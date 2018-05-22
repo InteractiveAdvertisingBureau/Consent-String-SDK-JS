@@ -56,5 +56,4 @@ declare class ConsentString {
   getVendorsAllowed(): number[];
   setVendorAllowed(vendorId: number, value: boolean): void;
   isVendorAllowed(vendorId: number): boolean;
-  getStringFieds(needAllFields: boolean): object;
 }
