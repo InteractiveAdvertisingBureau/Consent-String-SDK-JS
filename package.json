@@ -19,19 +19,17 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha test/ --recursive",
+    "test": "mocha --compilers js:babel-register test/ --recursive",
     "coverage": "nyc --reporter=html --reporter=text-summary --reporter=lcov --check-coverage --lines 60 --functions 60 --branches 60 mocha test/ --recursive",
     "lint": "eslint src/. test/.",
     "docs": "jsdoc -c .jsdoc.js -r",
     "build": "babel src --out-dir dist && cp src/index.d.ts dist/",
     "release": "npm run build && npm publish --access public"
   },
-  "dependencies": {
-    "base-64": "^0.1.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "babel-cli": "^6.26.0",
     "@59naga/babel-plugin-transform-array-from": "0.0.0",
+    "babel-cli": "^6.26.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-arrow-functions": "^6.22.0",
     "babel-plugin-transform-es2015-classes": "^6.24.1",
@@ -40,6 +38,7 @@
     "babel-plugin-transform-es2015-object-super": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
     "chai": "^4.0.2",
     "coveralls": "^3.0.0",
     "eslint": "^4.0.0",
@@ -47,6 +46,7 @@
     "eslint-plugin-import": "^2.3.0",
     "eslint-plugin-mocha": "^4.11.0",
     "jsdoc": "^3.5.5",
+    "jsdom": "^11.11.0",
     "mocha": "^3.4.2",
     "nyc": "^11.0.2",
     "sinon": "^4.5.0"

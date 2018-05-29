@@ -6,14 +6,21 @@ const {
   encodeDateToBits,
   encodeLetterToBits,
   encodeLanguageToBits,
-  encodeToBase64,
+  encodeToBase64Factory,
   decodeBitsToInt,
   decodeBitsToDate,
   decodeBitsToBool,
   decodeBitsToLanguage,
   decodeBitsToLetter,
-  decodeFromBase64,
+  decodeFromBase64Factory,
 } = require('../../src/utils/bits');
+
+const jsdom = require('jsdom');
+
+const { JSDOM } = jsdom;
+const givenWindow = new JSDOM('<!DOCTYPE html><div id="hello">Hello world</div>').window;
+const encodeToBase64 = encodeToBase64Factory(givenWindow.btoa);
+const decodeFromBase64 = decodeFromBase64Factory(givenWindow.atob);
 
 describe('bits', function () {
   describe('encodeIntToBits', function () {

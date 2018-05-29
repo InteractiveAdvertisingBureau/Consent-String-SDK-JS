@@ -1,11 +1,18 @@
 const { expect } = require('chai');
+const jsdom = require('jsdom');
 
+const { JSDOM } = jsdom;
 const vendorList = require('./vendors.json');
 
 const {
   convertVendorsToRanges,
-  encodeConsentString,
+  encodeConsentStringFactory,
 } = require('../src/encode');
+const { encodeToBase64Factory } = require('../src/utils/bits');
+
+const givenWindow = new JSDOM('<!DOCTYPE html><div id="hello">Hello world</div>').window;
+const encodeToBase64 = encodeToBase64Factory(givenWindow.btoa);
+const encodeConsentString = encodeConsentStringFactory(encodeToBase64);
 
 describe('convertVendorsToRanges', function () {
   it('converts a list of vendors to a full range', function () {

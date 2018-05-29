@@ -1,26 +1,42 @@
-const { encodeConsentString } = require('./encode');
-const { decodeConsentString } = require('./decode');
-const { vendorVersionMap } = require('./utils/definitions');
-
+/* eslint-disable no-unused-expressions */
 /**
  * Regular expression for validating
  */
 const consentLanguageRegexp = /^[a-z]{2}$/;
 
-class ConsentString {
+export default class Consent {
   /**
-   * Initialize a new ConsentString object
-   *
-   * @param {string} baseString An existing consent string to parse and use for our initial values
+   * Initialize a new Consent object
+   * @param {Array} vendorList
+   * @param {number} cmpId
+   * @param {number} cmpVersion
+   * @param {number} consentScreen
+   * @param {string} consentLanguage
+   * @param {Array} purposesAllowed
+   * @param {Array} vendorsAllowed
+   * @param {string} [null] consentString An existing consent string to parse and use for our initial values
+   * @param {Function} encoder
+   * @param {Function} decoder
    */
-  constructor(baseString = null) {
+  constructor({
+    vendorList,
+    cmpId,
+    cmpVersion,
+    consentScreen,
+    consentLanguage,
+    purposesAllowed,
+    vendorsAllowed,
+    consentString = null,
+    encoder,
+    decoder,
+  } = {}) {
     this.created = new Date();
     this.lastUpdated = new Date();
 
     /**
      * Version number of consent string specification
      *
-     * @type {integer}
+     * @type {number}
      */
     this.version = 1;
 
@@ -34,28 +50,28 @@ class ConsentString {
     /**
      * Version of the vendor list used for the purposes and vendors
      *
-     * @type {integer}
+     * @type {number}
      */
     this.vendorListVersion = null;
 
     /**
      * The unique ID of the CMP that last modified the consent string
      *
-     * @type {integer}
+     * @type {number}
      */
     this.cmpId = null;
 
     /**
      * Version of the code used by the CMP when collecting consent
      *
-     * @type {integer}
+     * @type {number}
      */
     this.cmpVersion = null;
 
     /**
      * ID of the screen used by CMP when collecting consent
      *
-     * @type {integer}
+     * @type {number}
      */
     this.consentScreen = null;
 
@@ -69,20 +85,38 @@ class ConsentString {
     /**
      * List of purpose IDs that the user has given consent to
      *
-     * @type {integer[]}
+     * @type {Array[]}
      */
     this.allowedPurposeIds = [];
 
     /**
      * List of vendor IDs that the user has given consent to
      *
-     * @type {integer[]}
+     * @type {Array[]}
      */
     this.allowedVendorIds = [];
+    /**
+     * Base64 encoder service
+     */
+    this.encoder = encoder;
+
+    /**
+     * Base64 decoder service
+     */
+    this.decoder = decoder;
+
 
     // Decode the base string
-    if (baseString) {
-      Object.assign(this, decodeConsentString(baseString));
+    if (consentString) {
+      Object.assign(this, this.decoder(consentString));
+    } else {
+      vendorList && this.setGlobalVendorList(vendorList);
+      cmpId && this.setCmpId(cmpId);
+      cmpVersion && this.setCmpVersion(cmpVersion);
+      consentScreen && this.setConsentScreen(consentScreen);
+      consentLanguage && this.setConsentLanguage(consentLanguage);
+      purposesAllowed && this.setPurposesAllowed(purposesAllowed);
+      vendorsAllowed && this.setVendorsAllowed(vendorsAllowed);
     }
   }
 
@@ -100,7 +134,7 @@ class ConsentString {
       this.lastUpdated = new Date();
     }
 
-    return encodeConsentString({
+    return this.encoder({
       version: this.getVersion(),
       vendorList: this.vendorList,
       allowedPurposeIds: this.allowedPurposeIds,
@@ -121,7 +155,7 @@ class ConsentString {
    * @return {string} Web-safe, base64-encoded metadata string
    */
   getMetadataString() {
-    return encodeConsentString({
+    return this.encoder({
       version: this.getVersion(),
       created: this.created,
       lastUpdated: this.lastUpdated,
@@ -131,26 +165,10 @@ class ConsentString {
       vendorListVersion: this.vendorListVersion,
     });
   }
-
-  /**
-   * Decode the web-safe, base64-encoded metadata string
-   * @param {string} encodedMetadata Web-safe, base64-encoded metadata string
-   * @return {object} decoded metadata
-   */
-  static decodeMetadataString(encodedMetadata) {
-    const decodedString = decodeConsentString(encodedMetadata);
-    const metadata = {};
-    vendorVersionMap[decodedString.version]
-      .metadataFields.forEach((field) => {
-        metadata[field] = decodedString[field];
-      });
-    return metadata;
-  }
-
   /**
    * Get the version number that this consent string specification adheres to
    *
-   * @return {integer} Version number of consent string specification
+   * @return {number} Version number of consent string specification
    */
   getVersion() {
     return this.version;
@@ -159,7 +177,7 @@ class ConsentString {
   /**
    * Get the version of the vendor list
    *
-   * @return {integer} Vendor list version
+   * @return {number} Vendor list version
    */
   getVendorListVersion() {
     return this.vendorListVersion;
@@ -207,7 +225,7 @@ class ConsentString {
    *
    * Every CMP is assigned a unique ID by the IAB EU that must be provided here before changing any other value in the consent string.
    *
-   * @param {integer} id CMP ID
+   * @param {number} id CMP ID
    */
   setCmpId(id) {
     this.cmpId = id;
@@ -216,7 +234,7 @@ class ConsentString {
   /**
    * Get the ID of the Consent Management Platform from the consent string
    *
-   * @return {integer}
+   * @return {number}
    */
   getCmpId() {
     return this.cmpId;
@@ -227,7 +245,7 @@ class ConsentString {
    *
    * This version number references the CMP code running when collecting the user consent.
    *
-   * @param {integer} version Version
+   * @param {number} version Version
    */
   setCmpVersion(version) {
     this.cmpVersion = version;
@@ -236,7 +254,7 @@ class ConsentString {
   /**
    * Get the verison of the Consent Management Platform that last modified the consent string
    *
-   * @return {integer}
+   * @return {number}
    */
   getCmpVersion() {
     return this.cmpVersion;
@@ -256,7 +274,7 @@ class ConsentString {
   /**
    * Get the Consent Management Platform screen ID that collected the user consent
    *
-   * @return {integer}
+   * @return {number}
    */
   getConsentScreen() {
     return this.consentScreen;
@@ -287,7 +305,7 @@ class ConsentString {
   /**
    * Set the list of purpose IDs that the user has given consent to
    *
-   * @param {integer[]} purposeIds An array of integers that map to the purposes defined in the vendor list. Purposes included in the array are purposes that the user has given consent to
+   * @param {number[]} purposeIds An array of integers that map to the purposes defined in the vendor list. Purposes included in the array are purposes that the user has given consent to
    */
   setPurposesAllowed(purposeIds) {
     this.allowedPurposeIds = purposeIds;
@@ -296,7 +314,7 @@ class ConsentString {
   /**
    * Get the list of purpose IDs that the user has given consent to
    *
-   * @return {integer[]}
+   * @return {Array[]}
    */
   getPurposesAllowed() {
     return this.allowedPurposeIds;
@@ -305,7 +323,7 @@ class ConsentString {
   /**
    * Set the consent status of a user for a given purpose
    *
-   * @param {integer} purposeId The ID (from the vendor list) of the purpose to update
+   * @param {number} purposeId The ID (from the vendor list) of the purpose to update
    * @param {boolean} value Consent status
    */
   setPurposeAllowed(purposeId, value) {
@@ -325,7 +343,7 @@ class ConsentString {
   /**
    * Check if the user has given consent for a specific purpose
    *
-   * @param {integer} purposeId
+   * @param {number} purposeId
    *
    * @return {boolean}
    */
@@ -336,7 +354,7 @@ class ConsentString {
   /**
    * Set the list of vendor IDs that the user has given consent to
    *
-   * @param {integer[]} vendorIds An array of integers that map to the vendors defined in the vendor list. Vendors included in the array are vendors that the user has given consent to
+   * @param {Array[]} vendorIds An array of integers that map to the vendors defined in the vendor list. Vendors included in the array are vendors that the user has given consent to
    */
   setVendorsAllowed(vendorIds) {
     this.allowedVendorIds = vendorIds;
@@ -345,7 +363,7 @@ class ConsentString {
   /**
    * Get the list of vendor IDs that the user has given consent to
    *
-   * @return {integer[]}
+   * @return {Array[]}
    */
   getVendorsAllowed() {
     return this.allowedVendorIds;
@@ -374,7 +392,7 @@ class ConsentString {
   /**
    * Check if the user has given consent for a specific vendor
    *
-   * @param {integer} vendorId
+   * @param {number} vendorId
    *
    * @return {boolean}
    */
@@ -382,7 +400,3 @@ class ConsentString {
     return this.allowedVendorIds.indexOf(vendorId) !== -1;
   }
 }
-
-module.exports = {
-  ConsentString,
-};

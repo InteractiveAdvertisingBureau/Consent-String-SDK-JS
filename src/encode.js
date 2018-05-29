@@ -1,7 +1,7 @@
 const {
-  encodeToBase64,
   padRight,
 } = require('./utils/bits');
+
 
 /**
  * Encode a list of vendor IDs into bits
@@ -81,53 +81,53 @@ function convertVendorsToRanges(vendors, allowedVendorIds) {
     return acc;
   }, []);
 }
-
+const encodeConsentStringFactory = encodeToBase64 =>
 /**
  * Encode consent data into a web-safe base64-encoded string
  *
  * @param {object} consentData Data to include in the string (see `utils/definitions.js` for the list of fields)
  */
-function encodeConsentString(consentData) {
-  let { maxVendorId } = consentData;
-  const { vendorList = {}, allowedPurposeIds, allowedVendorIds } = consentData;
-  const { vendors = [], purposes = [] } = vendorList;
+  function encodeConsentString(consentData) {
+    let { maxVendorId } = consentData;
+    const { vendorList = {}, allowedPurposeIds, allowedVendorIds } = consentData;
+    const { vendors = [], purposes = [] } = vendorList;
 
-  if (!maxVendorId) {
+    if (!maxVendorId) {
     // Find the max vendor ID from the vendor list if it has not been provided
-    maxVendorId = 0;
+      maxVendorId = 0;
 
-    vendors.forEach((vendor) => {
-      if (vendor.id > maxVendorId) {
-        maxVendorId = vendor.id;
-      }
+      vendors.forEach((vendor) => {
+        if (vendor.id > maxVendorId) {
+          maxVendorId = vendor.id;
+        }
+      });
+    }
+
+    // Encode the data with and without ranges and return the smallest encoded payload
+    const noRangesData = encodeToBase64({
+      ...consentData,
+      maxVendorId,
+      purposeIdBitString: encodePurposeIdsToBits(purposes, allowedPurposeIds),
+      isRange: false,
+      vendorIdBitString: encodeVendorIdsToBits(maxVendorId, allowedVendorIds),
     });
-  }
 
-  // Encode the data with and without ranges and return the smallest encoded payload
-  const noRangesData = encodeToBase64({
-    ...consentData,
-    maxVendorId,
-    purposeIdBitString: encodePurposeIdsToBits(purposes, allowedPurposeIds),
-    isRange: false,
-    vendorIdBitString: encodeVendorIdsToBits(maxVendorId, allowedVendorIds),
-  });
+    const vendorRangeList = convertVendorsToRanges(vendors, allowedVendorIds);
 
-  const vendorRangeList = convertVendorsToRanges(vendors, allowedVendorIds);
+    const rangesData = encodeToBase64({
+      ...consentData,
+      maxVendorId,
+      purposeIdBitString: encodePurposeIdsToBits(purposes, allowedPurposeIds),
+      isRange: true,
+      defaultConsent: false,
+      numEntries: vendorRangeList.length,
+      vendorRangeList,
+    });
 
-  const rangesData = encodeToBase64({
-    ...consentData,
-    maxVendorId,
-    purposeIdBitString: encodePurposeIdsToBits(purposes, allowedPurposeIds),
-    isRange: true,
-    defaultConsent: false,
-    numEntries: vendorRangeList.length,
-    vendorRangeList,
-  });
-
-  return noRangesData.length < rangesData.length ? noRangesData : rangesData;
-}
+    return noRangesData.length < rangesData.length ? noRangesData : rangesData;
+  };
 
 module.exports = {
   convertVendorsToRanges,
-  encodeConsentString,
+  encodeConsentStringFactory,
 };
