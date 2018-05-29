@@ -1,9 +1,15 @@
 const { expect } = require('chai');
+const jsdom = require('jsdom');
+const { decodeFromBase64Factory } = require('../src/utils/bits');
+const { decodeConsentStringFactory } = require('../src/decode');
 
-const { decodeConsentString } = require('../src/decode');
+const { JSDOM } = jsdom;
 
 describe('decode', function () {
   const aDate = new Date('2018-07-15 PDT');
+  const givenWindow = new JSDOM('<!DOCTYPE html><div id="hello">Hello world</div>').window;
+  const decodeFromBase64 = decodeFromBase64Factory(givenWindow.atob);
+  const decodeConsentString = decodeConsentStringFactory(decodeFromBase64);
 
   it('decodes the consent data from a base64-encoded string', function () {
     const consentData = decodeConsentString('BOQ7WlgOQ7WlgABACDENABwAAABJOACgACAAQABA');

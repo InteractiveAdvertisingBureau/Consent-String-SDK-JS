@@ -1,6 +1,6 @@
-// Type definitions for consent-string
+// Type definitions for consent class
 
-export = ConsentString;
+export = Consent;
 
 interface Purpose {
   id: number;
@@ -19,7 +19,7 @@ interface VendorList {
   vendors: Vendor[];
 }
 
-declare class ConsentString {
+declare class Consent {
   constructor(baseString?: string);
 
   private created: Date;

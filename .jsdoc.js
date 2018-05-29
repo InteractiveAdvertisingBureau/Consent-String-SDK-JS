@@ -2,7 +2,8 @@ module.exports = {
   source: {
     include: [
       'README.md',
-      'src/consent-string.js',
+      'src/Consent.js',
+      'src/ConsentFactory.js',
     ],
   },
   opts: {

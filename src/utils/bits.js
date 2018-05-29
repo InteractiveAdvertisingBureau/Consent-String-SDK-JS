@@ -1,6 +1,4 @@
 /* eslint no-use-before-define: off */
-
-const base64 = require('base-64');
 const {
   versionNumBits,
   vendorVersionMap,
@@ -234,11 +232,10 @@ function encodeDataToBits(data, definitionMap) {
     return encodeFields({ input: data, fields });
   }
 }
-
 /**
  * Take all fields required to encode the consent string and produce the URL safe Base64 encoded value
  */
-function encodeToBase64(data, definitionMap = vendorVersionMap) {
+const encodeToBase64Factory = btoa => (data, definitionMap = vendorVersionMap) => {
   const binaryValue = encodeDataToBits(data, definitionMap);
 
   if (binaryValue) {
@@ -252,14 +249,14 @@ function encodeToBase64(data, definitionMap = vendorVersionMap) {
     }
 
     // Make base64 string URL friendly
-    return base64.encode(bytes)
+    return btoa(bytes)
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
       .replace(/=+$/, '');
   }
 
   return null;
-}
+};
 
 function decodeConsentStringBitValue(bitString, definitionMap = vendorVersionMap) {
   const version = decodeBitsToInt(bitString, 0, versionNumBits);
@@ -275,23 +272,22 @@ function decodeConsentStringBitValue(bitString, definitionMap = vendorVersionMap
 
   return decodedObject;
 }
-
 /**
  * Decode the (URL safe Base64) value of a consent string into an object.
  */
-function decodeFromBase64(consentString, definitionMap) {
+const decodeFromBase64Factory = atob => (consentString, definitionMap) => {
   // Add padding
   let unsafe = consentString;
   while (unsafe.length % 4 !== 0) {
     unsafe += '=';
   }
 
-  // Replace safe characters
+  // Replace safe characters+
   unsafe = unsafe
     .replace(/-/g, '+')
     .replace(/_/g, '/');
 
-  const bytes = base64.decode(unsafe);
+  const bytes = atob(unsafe);
 
   let inputBits = '';
   for (let i = 0; i < bytes.length; i += 1) {
@@ -300,7 +296,7 @@ function decodeFromBase64(consentString, definitionMap) {
   }
 
   return decodeConsentStringBitValue(inputBits, definitionMap);
-}
+};
 
 function decodeBitsToIds(bitString) {
   return bitString.split('').reduce((acc, bit, index) => {
@@ -323,12 +319,12 @@ module.exports = {
   encodeDateToBits,
   encodeLanguageToBits,
   encodeLetterToBits,
-  encodeToBase64,
+  encodeToBase64Factory,
   decodeBitsToIds,
   decodeBitsToInt,
   decodeBitsToDate,
   decodeBitsToBool,
   decodeBitsToLanguage,
   decodeBitsToLetter,
-  decodeFromBase64,
+  decodeFromBase64Factory,
 };
