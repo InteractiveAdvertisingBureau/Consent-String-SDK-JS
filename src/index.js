@@ -13,7 +13,7 @@ const encodeToBase64 = encodeToBase64Factory(window.btoa);
 const decodeFromBase64 = decodeFromBase64Factory(window.atob);
 const decodeConsentString = decodeConsentStringFactory(decodeFromBase64);
 const encodeConsentString = encodeConsentStringFactory(encodeToBase64);
-const consentFactoryInstance = new ConsentFactory({
+const consentFactory = new ConsentFactory({
   encoder: encodeConsentString,
   decoder: decodeConsentString,
 });
@@ -21,6 +21,6 @@ const consentFactoryInstance = new ConsentFactory({
 const decodeMetadataString = decodeMetadataStringFactory(decodeConsentString)(vendorVersionMap);
 
 export {
-  consentFactoryInstance,
+  consentFactory,
   decodeMetadataString,
 };
