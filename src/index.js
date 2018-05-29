@@ -4,6 +4,8 @@ import { decodeFromBase64Factory, encodeToBase64Factory } from './utils/bits';
 import { decodeConsentStringFactory } from './decode';
 import { encodeConsentStringFactory } from './encode';
 import ConsentFactory from './ConsentFactory';
+import { vendorVersionMap } from './utils/definitions';
+import decodeMetadataStringFactory from './utils/decodeMetadataString';
 
 //  Build Graph dependencies
 
@@ -16,4 +18,9 @@ const consentFactoryInstance = new ConsentFactory({
   decoder: decodeConsentString,
 });
 
-export default consentFactoryInstance;
+const decodeMetadataString = decodeMetadataStringFactory(decodeConsentString)(vendorVersionMap);
+
+export {
+  consentFactoryInstance,
+  decodeMetadataString,
+};

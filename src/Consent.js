@@ -150,6 +150,22 @@ export default class Consent {
   }
 
   /**
+   * Get the web-safe, base64-encoded metadata string
+   *
+   * @return {string} Web-safe, base64-encoded metadata string
+   */
+  getMetadataString() {
+    return this.encoder({
+      version: this.getVersion(),
+      created: this.created,
+      lastUpdated: this.lastUpdated,
+      cmpId: this.cmpId,
+      cmpVersion: this.cmpVersion,
+      consentScreen: this.consentScreen,
+      vendorListVersion: this.vendorListVersion,
+    });
+  }
+  /**
    * Get the version number that this consent string specification adheres to
    *
    * @return {number} Version number of consent string specification

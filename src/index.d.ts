@@ -34,7 +34,9 @@ declare class Consent {
   private allowedPurposeIds: number[];
   private allowedVendorIds: number[];
 
+  static decodeMetadataString(encodedMetadata:string): object;
   public getConsentString(updateDate?:boolean): string;
+  public getMetadataString(): string;
   public getVersion(): number;
   public getVendorListVersion(): number;
   public setGlobalVendorList(vendorList: VendorList): void;
