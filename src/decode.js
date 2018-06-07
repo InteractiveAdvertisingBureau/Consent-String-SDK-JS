@@ -53,7 +53,7 @@ function decodeConsentString(consentString) {
 
     consentStringData.allowedVendorIds = [];
 
-    for (let i = 0; i <= maxVendorId; i += 1) {
+    for (let i = 1; i <= maxVendorId; i += 1) {
       if (
         (defaultConsent && !idMap[i]) ||
         (!defaultConsent && idMap[i])
