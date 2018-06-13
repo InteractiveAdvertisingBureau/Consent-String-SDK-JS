@@ -57,7 +57,7 @@ export class ConsentString {
   public setConsentLanguage(language: string): void;
   public getConsentLanguage(): string;
   public setPurposesAllowed(purposeIds: number[]): void;
-  public getPurposesAllowed(): number;
+  public getPurposesAllowed(): number[];
   public setPurposeAllowed(purposeId: number, value: boolean): void;
   public isPurposeAllowed(purposeId: number): boolean;
   public setVendorsAllowed(vendorIds: number[]): void;
