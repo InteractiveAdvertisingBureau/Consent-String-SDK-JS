@@ -1,25 +1,35 @@
 // Type definitions for consent-string
 
-export = ConsentString;
-
-interface Purpose {
+export interface Purpose {
   id: number;
   name: string;
+  description: string;
 }
 
-interface Vendor {
+export interface Feature {
   id: number;
   name: string;
+  description: string;
 }
 
-interface VendorList {
-  version: number;
-  origin: string;
+export interface Vendor {
+  deletedDate?: string;
+  id: number;
+  featureIds: number[];
+  legIntPurposeIds: number[];
+  name: string;
+  policyUrl: string;
+  purposeIds: number[];
+}
+
+export interface VendorList {
+  features: Feature[];
   purposes: Purpose[];
+  vendorListVersion: number;
   vendors: Vendor[];
 }
 
-declare class ConsentString {
+export class ConsentString {
   constructor(baseString?: string);
 
   private created: Date;
@@ -34,9 +44,7 @@ declare class ConsentString {
   private allowedPurposeIds: number[];
   private allowedVendorIds: number[];
 
-  static decodeMetadataString(encodedMetadata:string): object;
   public getConsentString(updateDate?:boolean): string;
-  public getMetadataString(): string;
   public getVersion(): number;
   public getVendorListVersion(): number;
   public setGlobalVendorList(vendorList: VendorList): void;
@@ -44,16 +52,20 @@ declare class ConsentString {
   public getCmpId(): number;
   public setCmpVersion(version: number): void;
   public getCmpVersion(): number;
-  setConsentScreen(screenId: number): void;
-  getConsentScreen(): number;
-  setConsentLanguage(language: string): void;
-  getConsentLanguage(): string;
-  setPurposesAllowed(purposeIds: number[]): void;
-  getPurposesAllowed(): number;
-  setPurposeAllowed(purposeId: number, value: boolean): void;
-  isPurposeAllowed(purposeId: number): boolean;
-  setVendorsAllowed(vendorIds: number[]): void;
-  getVendorsAllowed(): number[];
-  setVendorAllowed(vendorId: number, value: boolean): void;
-  isVendorAllowed(vendorId: number): boolean;
+  public setConsentScreen(screenId: number): void;
+  public getConsentScreen(): number;
+  public setConsentLanguage(language: string): void;
+  public getConsentLanguage(): string;
+  public setPurposesAllowed(purposeIds: number[]): void;
+  public getPurposesAllowed(): number[];
+  public setPurposeAllowed(purposeId: number, value: boolean): void;
+  public isPurposeAllowed(purposeId: number): boolean;
+  public setVendorsAllowed(vendorIds: number[]): void;
+  public getVendorsAllowed(): number[];
+  public setVendorAllowed(vendorId: number, value: boolean): void;
+  public isVendorAllowed(vendorId: number): boolean;
 }
+
+export function decodeConsentString(consentString: string): ConsentString;
+
+export function encodeConsentString(consentData: ConsentString): string;
