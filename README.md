@@ -85,6 +85,7 @@ const consentData = new ConsentString();
 
 // Set the global vendor list
 // You need to download and provide the vendor list yourself
+// It can be found here - https://vendorlist.consensu.org/vendorlist.json
 consentData.setGlobalVendorList(vendorList);
 
 // Set the consent data
