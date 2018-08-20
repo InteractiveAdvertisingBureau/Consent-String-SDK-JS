@@ -28,7 +28,7 @@ function encodeIntToBits(number, numBits) {
   let bitString = '';
 
   if (typeof number === 'number' && !isNaN(number)) {
-    bitString = parseInt(number, 10).toString(2);
+    bitString = number.toString(2);
   }
 
   // Pad the string if not filling all bits
