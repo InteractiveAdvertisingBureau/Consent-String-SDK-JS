@@ -1,7 +1,6 @@
-const { encodeConsentString } = require('./encode');
+const { encodeConsentString, getMaxVendorId, encodeVendorIdsToBits, encodePurposeIdsToBits } = require('./encode');
 const { decodeConsentString } = require('./decode');
 const { vendorVersionMap } = require('./utils/definitions');
-
 /**
  * Regular expression for validating
  */
@@ -113,6 +112,33 @@ class ConsentString {
       consentLanguage: this.consentLanguage,
       vendorListVersion: this.vendorListVersion,
     });
+  }
+
+  /**
+   * Get the max vendorId
+   *
+   * @return {number} maxVendorId from the vendorList provided
+   */
+  getMaxVendorId() {
+    return getMaxVendorId(this.vendorList.vendors);
+  }
+
+  /**
+   * get the consents in a bit string.  This is to fulfill the in-app requirement
+   *
+   * @return {string} a bit string of all of the vendor consent data
+   */
+  getParsedVendorConsents() {
+    return encodeVendorIdsToBits(getMaxVendorId(this.vendorList.vendors), this.allowedVendorIds);
+  }
+
+  /**
+   * get the consents in a bit string.  This is to fulfill the in-app requirement
+   *
+   * @return {string} a bit string of all of the vendor consent data
+   */
+  getParsedPurposeConsents() {
+    return encodePurposeIdsToBits(this.vendorList.purposes, this.allowedPurposeIds);
   }
 
   /**
