@@ -151,13 +151,6 @@ function decodeField({ input, output, startPosition, field }) {
 
   const bitCount = typeof numBits === 'function' ? numBits(output) : numBits;
 
-  let listEntryCount = 0;
-  if (typeof listCount === 'function') {
-    listEntryCount = listCount(output);
-  } else if (typeof listCount === 'number') {
-    listEntryCount = listCount;
-  }
-
   switch (type) {
     case 'int':
       return { fieldValue: decodeBitsToInt(input, startPosition, bitCount) };
@@ -168,22 +161,38 @@ function decodeField({ input, output, startPosition, field }) {
     case 'bits':
       return { fieldValue: input.substr(startPosition, bitCount) };
     case 'list':
-      return new Array(listEntryCount).fill().reduce((acc) => {
-        const { decodedObject, newPosition } = decodeFields({
-          input,
-          fields: field.fields,
-          startPosition: acc.newPosition,
-        });
-        return {
-          fieldValue: [...acc.fieldValue, decodedObject],
-          newPosition,
-        };
-      }, { fieldValue: [], newPosition: startPosition });
+      return decodeList(input, output, startPosition, field, listCount);
     case 'language':
       return { fieldValue: decodeBitsToLanguage(input, startPosition, bitCount) };
     default:
       throw new Error(`ConsentString - Unknown field type ${type} for decoding`);
   }
+}
+
+function decodeList(input, output, startPosition, field, listCount) {
+  let listEntryCount = 0;
+
+  if (typeof listCount === 'function') {
+    listEntryCount = listCount(output);
+  } else if (typeof listCount === 'number') {
+    listEntryCount = listCount;
+  }
+
+  let newPosition = startPosition;
+  const fieldValue = [];
+
+  for (let i = 0; i < listEntryCount; i += 1) {
+    const decodedFields = decodeFields({
+      input,
+      fields: field.fields,
+      startPosition: newPosition,
+    });
+
+    newPosition = decodedFields.newPosition;
+    fieldValue.push(decodedFields.decodedObject);
+  }
+
+  return { fieldValue, newPosition };
 }
 
 function decodeFields({ input, fields, startPosition = 0 }) {
