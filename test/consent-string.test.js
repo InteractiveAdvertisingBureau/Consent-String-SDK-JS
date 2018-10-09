@@ -31,6 +31,45 @@ describe('ConsentString', function () {
     expect(new ConsentString(consentString.getConsentString(false))).to.deep.include(consentData);
   });
 
+  it('gets the max vendor id as expected', function () {
+    const consentString = new ConsentString();
+    consentString.setGlobalVendorList(vendorList);
+    Object.assign(consentString, consentData);
+    expect(consentString.getMaxVendorId()).to.equal(112);
+  });
+
+  it('gets the parsed vendor consents', function () {
+    const consentString = new ConsentString();
+    consentString.setGlobalVendorList(vendorList);
+    Object.assign(consentString, consentData);
+
+    const parsedVendors = consentString.getParsedVendorConsents();
+    expect(parsedVendors.length).to.equal(112);
+    for (let i = 0; i < consentString.getMaxVendorId(); i += 1) {
+      if (consentData.allowedVendorIds.includes(i + 1)) {
+        expect(parsedVendors[i]).to.equal('1');
+      } else {
+        expect(parsedVendors[i]).to.equal('0');
+      }
+    }
+  });
+
+  it('gets the parsed purpose consents', function () {
+    const consentString = new ConsentString();
+    consentString.setGlobalVendorList(vendorList);
+    Object.assign(consentString, consentData);
+
+    const parsedPurposes = consentString.getParsedPurposeConsents();
+    expect(parsedPurposes.length).to.equal(vendorList.purposes.length);
+    for (let i = 0; i < vendorList.purposes.length; i += 1) {
+      if (consentData.allowedPurposeIds.includes(i + 1)) {
+        expect(parsedPurposes[i]).to.equal('1');
+      } else {
+        expect(parsedPurposes[i]).to.equal('0');
+      }
+    }
+  });
+
   it('encodes the Metadata String as expected', function () {
     const consentString = new ConsentString();
     consentString.setGlobalVendorList(vendorList);
@@ -76,7 +115,7 @@ describe('ConsentString', function () {
       expect(allowedPurposes.length - 1).to.equal(consentString.allowedPurposeIds.length);
     });
 
-    it("shouldn't throw an error when calling isPurposeAllowed", function() {
+    it("shouldn't throw an error when calling isPurposeAllowed", function () {
       const consentString = new ConsentString();
       consentString.setGlobalVendorList(vendorList);
       Object.assign(consentString, consentData);

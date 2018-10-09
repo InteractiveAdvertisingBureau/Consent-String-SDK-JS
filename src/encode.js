@@ -83,6 +83,22 @@ function convertVendorsToRanges(vendors, allowedVendorIds) {
 }
 
 /**
+ * Get maxVendorId from the list of vendors and return that id
+ *
+ * @param {object} vendors
+ */
+function getMaxVendorId(vendors) {
+  // Find the max vendor ID from the vendor list
+  let maxVendorId = 0;
+
+  vendors.forEach((vendor) => {
+    if (vendor.id > maxVendorId) {
+      maxVendorId = vendor.id;
+    }
+  });
+  return maxVendorId;
+}
+/**
  * Encode consent data into a web-safe base64-encoded string
  *
  * @param {object} consentData Data to include in the string (see `utils/definitions.js` for the list of fields)
@@ -92,15 +108,9 @@ function encodeConsentString(consentData) {
   const { vendorList = {}, allowedPurposeIds, allowedVendorIds } = consentData;
   const { vendors = [], purposes = [] } = vendorList;
 
+  // if no maxVendorId is in the ConsentData, get it
   if (!maxVendorId) {
-    // Find the max vendor ID from the vendor list if it has not been provided
-    maxVendorId = 0;
-
-    vendors.forEach((vendor) => {
-      if (vendor.id > maxVendorId) {
-        maxVendorId = vendor.id;
-      }
-    });
+    maxVendorId = getMaxVendorId(vendors);
   }
 
   // Encode the data with and without ranges and return the smallest encoded payload
@@ -130,4 +140,7 @@ function encodeConsentString(consentData) {
 module.exports = {
   convertVendorsToRanges,
   encodeConsentString,
+  getMaxVendorId,
+  encodeVendorIdsToBits,
+  encodePurposeIdsToBits,
 };

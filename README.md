@@ -169,6 +169,27 @@ getConsentString()
 
 
 ---
+#### getMaxVendorId()
+Gets the maxVendorId from the vendor list. 
+```javascript
+// @return number 
+getMaxVendorId()
+```
+---
+#### getParsedVendorConsents()
+Gets the binary string format of the vendor consents.  1 being has consent 0 being no consent.
+```javascript
+// @return string (binary) 
+getParsedVendorConsents()
+```
+---
+#### getParsedPurposes()
+Gets the binary string format of the purpose consents.  1 being has consent 0 being no consent.
+```javascript
+// @return string (binary) 
+getParsedPurposes()
+```
+---
 #### getMetadataString()
 Gets the metadata string as defined in the response to the getVendorConsents method (ie binary string that includes only header information like consent string version, timestamps, cmp ID, etc. but no purposes/consents information).
 
