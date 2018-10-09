@@ -26,14 +26,15 @@ function encodeVendorIdsToBits(maxVendorId, allowedVendorIds = []) {
  * @param {*} allowedPurposeIds List of purpose IDs that the user has given consent to
  */
 function encodePurposeIdsToBits(purposes, allowedPurposeIds = new Set()) {
-  const maxPurposeId = Math.max(
-    0,
-    ...purposes.map(({ id }) => id),
-    ...Array.from(allowedPurposeIds),
-  );
+  let maxPurposeId = 0;
+  for (let i = 0; i < purposes.length; i += 1) {
+    maxPurposeId = Math.max(maxPurposeId, purposes[i].id);
+  }
+  for (let i = 0; i < allowedPurposeIds.length; i += 1) {
+    maxPurposeId = Math.max(maxPurposeId, allowedPurposeIds[i]);
+  }
 
   let purposeString = '';
-
   for (let id = 1; id <= maxPurposeId; id += 1) {
     purposeString += (allowedPurposeIds.indexOf(id) !== -1 ? '1' : '0');
   }
@@ -49,10 +50,12 @@ function encodePurposeIdsToBits(purposes, allowedPurposeIds = new Set()) {
  */
 function convertVendorsToRanges(vendors, allowedVendorIds) {
   let range = [];
+  const ranges = [];
 
   const idsInList = vendors.map(vendor => vendor.id);
 
-  return vendors.reduce((acc, { id }, index) => {
+  for (let index = 0; index < vendors.length; index += 1) {
+    const { id } = vendors[index];
     if (allowedVendorIds.indexOf(id) !== -1) {
       range.push(id);
     }
@@ -71,15 +74,15 @@ function convertVendorsToRanges(vendors, allowedVendorIds) {
 
       range = [];
 
-      return [...acc, {
+      ranges.push({
         isRange: typeof endVendorId === 'number',
         startVendorId,
         endVendorId,
-      }];
+      });
     }
+  }
 
-    return acc;
-  }, []);
+  return ranges;
 }
 
 /**
