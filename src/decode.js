@@ -3,6 +3,10 @@ const {
   decodeFromBase64,
 } = require('./utils/bits');
 
+const {
+  purposesVersionMap,
+} = require('./utils/definitions');
+
 /**
  * Decode consent data from a web-safe base64-encoded string
  *
@@ -70,6 +74,42 @@ function decodeConsentString(consentString) {
   return consentStringData;
 }
 
+
+/**
+ * Decode purposes data from a web-safe base64-encoded string
+ *
+ * @param {string} purposesString
+ */
+function decodePurposeString(purposesString) {
+
+  const {
+    cookieVersion,
+    created,
+    lastUpdated,
+    cmpId,
+    vendorListVersion,
+    publisherPurposeVersion,
+    standardPurposeIdBitString,
+    numCustomPurposes,
+    customPurposeIdBitString
+  } = decodeFromBase64(purposesString, purposesVersionMap);
+
+  const purposesStringData = {
+    cookieVersion,
+    created,
+    lastUpdated,
+    cmpId,
+    vendorListVersion,
+    publisherPurposeVersion,
+    standardPurposeIdBitString,
+    numCustomPurposes,
+    customPurposeIdBitString
+  };
+
+  return purposesStringData;
+}
+
 module.exports = {
   decodeConsentString,
+  decodePurposeString,
 };

@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 
-const { decodeConsentString } = require('../src/decode');
+const { decodeConsentString, decodePurposeString } = require('../src/decode');
 
 describe('decode', function () {
   const aDate = new Date('2018-07-15 PDT');
@@ -45,5 +45,21 @@ describe('decode', function () {
     };
     expect(consentData).to.deep.equal(toCompareWith);
     expect(consentData2).to.deep.equal(toCompareWith);
+  });
+
+  it('decodes the purpose data from a base64-encoded string', function () {
+    const consentData = decodePurposeString('BOXoqAAOXoqAAABB5AB-AAACwA');
+
+    expect(consentData).to.deep.equal({
+      cookieVersion: 1,
+      created: new Date("2018-11-22T13:05:29.600Z"),
+      lastUpdated: new Date("2018-11-22T13:05:29.600Z"),
+      cmpId: 1,
+      vendorListVersion: 121,
+      publisherPurposeVersion: 1,
+      standardPurposeIdBitString: "111110000000000000000000",
+      numCustomPurposes: 2,
+      customPurposeIdBitString: "11"
+    });
   });
 });
