@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 
-const { decodeConsentString, decodePurposeString } = require('../src/decode');
+const { decodeConsentString, decodePurposesString } = require('../src/decode');
 
 describe('decode', function () {
   const aDate = new Date('2018-07-15 PDT');
@@ -48,7 +48,7 @@ describe('decode', function () {
   });
 
   it('decodes the purpose data from a base64-encoded string', function () {
-    const consentData = decodePurposeString('BOXoqAAOXoqAAABB5AB-AAACwA');
+    const consentData = decodePurposesString('BOXoqAAOXoqAAABB5AB-AAACwA');
 
     expect(consentData).to.deep.equal({
       cookieVersion: 1,

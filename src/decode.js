@@ -80,7 +80,7 @@ function decodeConsentString(consentString) {
  *
  * @param {string} purposesString
  */
-function decodePurposeString(purposesString) {
+function decodePurposesString(purposesString) {
 
   const {
     cookieVersion,
@@ -111,5 +111,5 @@ function decodePurposeString(purposesString) {
 
 module.exports = {
   decodeConsentString,
-  decodePurposeString,
+  decodePurposesString,
 };
