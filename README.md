@@ -183,11 +183,11 @@ Gets the binary string format of the vendor consents.  1 being has consent 0 bei
 getParsedVendorConsents()
 ```
 ---
-#### getParsedPurposes()
+#### getParsedPurposeConsents()
 Gets the binary string format of the purpose consents.  1 being has consent 0 being no consent.
 ```javascript
 // @return string (binary) 
-getParsedPurposes()
+getParsedPurposeConsents()
 ```
 ---
 #### getMetadataString()
