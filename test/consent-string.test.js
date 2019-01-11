@@ -24,8 +24,10 @@ describe('ConsentString', function () {
   const resultingMetadaString = 'BOQ7WlgOQ7WlgABACDAAABAAAAAAAA';
 
   it('gives the same result when encoding then decoding data', function () {
+
     const consentString = new ConsentString();
     consentString.setGlobalVendorList(vendorList);
+
     Object.assign(consentString, consentData);
 
     expect(new ConsentString(consentString.getConsentString(false))).to.deep.include(consentData);
@@ -180,7 +182,7 @@ describe('ConsentString', function () {
         ],
       });
 
-      expect(consent.vendorList.vendors).to.deep.equal([
+      expect(consent.getGlobalVendorList().vendors).to.deep.equal([
         { id: 1 },
         { id: 2 },
       ]);
