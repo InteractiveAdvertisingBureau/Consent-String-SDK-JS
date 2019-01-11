@@ -49,9 +49,7 @@ Sets the `Date` created
 ```javascript
 setCreatedDate(new Date());
 ```
-
-___
-
+---
 #### getMaxVendorId()
 Gets the maxVendorId from the vendor list. 
 ```javascript
