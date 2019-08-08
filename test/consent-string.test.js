@@ -1,7 +1,5 @@
 const { expect } = require('chai');
-
 const vendorList = require('./vendors.json');
-
 const { ConsentString } = require('../src/consent-string');
 
 describe('ConsentString', function () {
@@ -24,7 +22,6 @@ describe('ConsentString', function () {
   const resultingMetadaString = 'BOQ7WlgOQ7WlgABACDAAABAAAAAAAA';
 
   it('gives the same result when encoding then decoding data', function () {
-
     const consentString = new ConsentString();
     consentString.setGlobalVendorList(vendorList);
 
@@ -38,6 +35,17 @@ describe('ConsentString', function () {
     consentString.setGlobalVendorList(vendorList);
     Object.assign(consentString, consentData);
     expect(consentString.getMaxVendorId()).to.equal(112);
+  });
+
+  it('Should decode without having a vendorlist and return the string I set', function () {
+    const encoded = 'BOhs9bQOjjnLQAXABBENCfeAAAApmABgAYADoA';
+    expect(() => {
+      const consentString = new ConsentString(encoded);
+      expect(consentString.isPurposeAllowed(2)).to.be.true;
+      expect(consentString.isVendorAllowed(12)).to.be.true;
+      expect(consentString.isVendorAllowed(11)).to.be.false;
+      expect(consentString.getConsentString(false)).to.equal(encoded);
+    }).not.to.throw();
   });
 
   it('gets the parsed vendor consents', function () {

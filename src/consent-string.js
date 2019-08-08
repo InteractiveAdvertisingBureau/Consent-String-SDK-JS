@@ -5,6 +5,7 @@ const { vendorVersionMap } = require('./utils/definitions');
  * Regular expression for validating
  */
 const consentLanguageRegexp = /^[a-z]{2}$/;
+let cachedString;
 
 class ConsentString {
   constructor(baseString = null) {
@@ -22,55 +23,66 @@ class ConsentString {
 
     // Decode the base string
     if (baseString) {
+      cachedString = baseString;
       Object.assign(this, decodeConsentString(baseString));
     }
   }
+
   getConsentString(updateDate = true) {
-    if (!this.vendorList) {
-      throw new Error('ConsentString - A vendor list is required to encode a consent string');
-    }
+    let retr;
 
-    if (updateDate === true) {
-      this.lastUpdated = new Date();
-    }
+    /**
+     * check for cached string that was passed in.  This avoids having to
+     * decode the consent string and even to have a vendorlist
+     */
+    if (cachedString && !updateDate) {
+      retr = cachedString;
+    } else {
+      if (!this.vendorList) {
+        throw new Error('ConsentString - A vendor list is required to encode a consent string');
+      }
 
-    return encodeConsentString({
-      version: this.getVersion(),
-      vendorList: this.vendorList,
-      allowedPurposeIds: this.allowedPurposeIds,
-      allowedVendorIds: this.allowedVendorIds,
-      created: this.created,
-      lastUpdated: this.lastUpdated,
-      cmpId: this.cmpId,
-      cmpVersion: this.cmpVersion,
-      consentScreen: this.consentScreen,
-      consentLanguage: this.consentLanguage,
-      vendorListVersion: this.vendorListVersion,
-    });
+      if (updateDate === true) {
+        this.lastUpdated = new Date();
+      }
+
+      retr = encodeConsentString({
+        version: this.getVersion(),
+        vendorList: this.vendorList,
+        allowedPurposeIds: this.allowedPurposeIds,
+        allowedVendorIds: this.allowedVendorIds,
+        created: this.created,
+        lastUpdated: this.lastUpdated,
+        cmpId: this.cmpId,
+        cmpVersion: this.cmpVersion,
+        consentScreen: this.consentScreen,
+        consentLanguage: this.consentLanguage,
+        vendorListVersion: this.vendorListVersion,
+      });
+
+      cachedString = retr;
+    }
+    return retr;
   }
   getLastUpdated() {
-
     return this.lastUpdated;
   }
   setLastUpdated(date = null) {
-    if(date) {
-
+    cachedString = '';
+    if (date) {
       this.lastUpdated = new Date(date);
     } else {
-
       this.lastUpdated = new Date();
     }
   }
   getCreated() {
-
     return this.created;
   }
   setCreated(date = null) {
-    if(date) {
-
+    cachedString = '';
+    if (date) {
       this.created = new Date(date);
     } else {
-
       this.created = new Date();
     }
   }
@@ -123,39 +135,52 @@ class ConsentString {
       throw new Error('ConsentString - The provided vendor list does not respect the schema from the IAB EU’s GDPR Consent and Transparency Framework');
     }
 
-    // Cloning the GVL
-    // It's important as we might transform it and don't want to modify objects that we do not own
-    this.vendorList = {
-      vendorListVersion: vendorList.vendorListVersion,
-      lastUpdated: vendorList.lastUpdated,
-      purposes: vendorList.purposes,
-      features: vendorList.features,
+    // does a vendorList already exist and is it a different version
+    if (!this.vendorList || this.vendorListVersion !== vendorList.vendorListVersion) {
+      cachedString = '';
+      // Cloning the GVL
+      // It's important as we might transform it and don't want to modify objects that we do not own
+      this.vendorList = {
+        vendorListVersion: vendorList.vendorListVersion,
+        lastUpdated: vendorList.lastUpdated,
+        purposes: vendorList.purposes,
+        features: vendorList.features,
 
-      // Clone the list and sort the vendors by ID (it breaks our range generation algorithm if they are not sorted)
-      vendors: vendorList.vendors
-        .slice(0)
-        .sort((firstVendor, secondVendor) => (firstVendor.id < secondVendor.id ? -1 : 1)),
-    };
-    this.vendorListVersion = vendorList.vendorListVersion;
+        // Clone the list and sort the vendors by ID (it breaks our range generation algorithm if they are not sorted)
+        vendors: vendorList.vendors
+          .slice(0)
+          .sort((firstVendor, secondVendor) => (firstVendor.id < secondVendor.id ? -1 : 1)),
+      };
+      this.vendorListVersion = vendorList.vendorListVersion;
+    }
   }
-  getGlobalVendorList() {
 
+  getGlobalVendorList() {
     return this.vendorList;
   }
   setCmpId(id) {
-    this.cmpId = id;
+    if (id !== this.cmpId) {
+      cachedString = '';
+      this.cmpId = id;
+    }
   }
   getCmpId() {
     return this.cmpId;
   }
   setCmpVersion(version) {
-    this.cmpVersion = version;
+    if (version !== this.cmpVersion) {
+      cachedString = '';
+      this.cmpVersion = version;
+    }
   }
   getCmpVersion() {
     return this.cmpVersion;
   }
   setConsentScreen(screenId) {
-    this.consentScreen = screenId;
+    if (screenId !== this.consentScreen) {
+      cachedString = '';
+      this.consentScreen = screenId;
+    }
   }
   getConsentScreen() {
     return this.consentScreen;
@@ -165,12 +190,16 @@ class ConsentString {
       throw new Error('ConsentString - The consent language must be a two-letter ISO639-1 code (en, fr, de, etc.)');
     }
 
-    this.consentLanguage = language;
+    if (language !== this.consentLanguage) {
+      cachedString = '';
+      this.consentLanguage = language;
+    }
   }
   getConsentLanguage() {
     return this.consentLanguage;
   }
   setPurposesAllowed(purposeIds) {
+    cachedString = '';
     this.allowedPurposeIds = purposeIds;
   }
   getPurposesAllowed() {
@@ -178,6 +207,8 @@ class ConsentString {
   }
   setPurposeAllowed(purposeId, value) {
     const purposeIndex = this.allowedPurposeIds.indexOf(purposeId);
+
+    cachedString = '';
 
     if (value === true) {
       if (purposeIndex === -1) {
@@ -193,6 +224,7 @@ class ConsentString {
     return this.allowedPurposeIds.indexOf(purposeId) !== -1;
   }
   setVendorsAllowed(vendorIds) {
+    cachedString = '';
     this.allowedVendorIds = vendorIds;
   }
   getVendorsAllowed() {
@@ -201,6 +233,7 @@ class ConsentString {
   setVendorAllowed(vendorId, value) {
     const vendorIndex = this.allowedVendorIds.indexOf(vendorId);
 
+    cachedString = '';
     if (value === true) {
       if (vendorIndex === -1) {
         this.allowedVendorIds.push(vendorId);
