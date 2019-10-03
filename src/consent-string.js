@@ -9,6 +9,7 @@ let cachedString;
 
 class ConsentString {
   constructor(baseString = null) {
+    this.maxVendorId = 0;
     this.created = new Date();
     this.lastUpdated = new Date();
     this.version = 1;
@@ -87,7 +88,12 @@ class ConsentString {
     }
   }
   getMaxVendorId() {
-    return getMaxVendorId(this.vendorList.vendors);
+    if (!this.maxVendorId) {
+      if (this.vendorList) {
+        this.maxVendorId = getMaxVendorId(this.vendorList.vendors);
+      }
+    }
+    return this.maxVendorId;
   }
   getParsedVendorConsents() {
     return encodeVendorIdsToBits(getMaxVendorId(this.vendorList.vendors), this.allowedVendorIds);

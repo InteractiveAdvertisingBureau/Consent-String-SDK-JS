@@ -1,6 +1,6 @@
 {
   "name": "consent-string",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Encode and decode web-safe base64 consent information with the IAB EU's GDPR Transparency and Consent Framework",
   "homepage": "https://github.com/InteractiveAdvertisingBureau/Consent-String-SDK-JS",
   "repository": "https://github.com/InteractiveAdvertisingBureau/Consent-String-SDK-JS",
