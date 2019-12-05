@@ -4,18 +4,27 @@ const {
 } = require('./utils/bits');
 
 /**
+ * Create a binary string with allowances by list of ids
+ *
+ * @param {number} maxId
+ * @param {number[]} allowedIds
+ */
+function createStringWithAllowances(maxId, allowedIds) {
+  let string = '';
+  for (let id = 1; id <= maxId; id += 1) {
+    string += (allowedIds.indexOf(id) !== -1 ? '1' : '0');
+  }
+  return string;
+}
+
+/**
  * Encode a list of vendor IDs into bits
  *
- * @param {integer} maxVendorId Highest vendor ID in the vendor list
- * @param {integer[]} allowedVendorIds Vendors that the user has given consent to
+ * @param {number} maxVendorId Highest vendor ID in the vendor list
+ * @param {number[]} allowedVendorIds Vendors that the user has given consent to
  */
 function encodeVendorIdsToBits(maxVendorId, allowedVendorIds = []) {
-  let vendorString = '';
-
-  for (let id = 1; id <= maxVendorId; id += 1) {
-    vendorString += (allowedVendorIds.indexOf(id) !== -1 ? '1' : '0');
-  }
-
+  const vendorString = createStringWithAllowances(maxVendorId, allowedVendorIds);
   return padRight(vendorString, Math.max(0, maxVendorId - vendorString.length));
 }
 
@@ -26,27 +35,16 @@ function encodeVendorIdsToBits(maxVendorId, allowedVendorIds = []) {
  * @param {*} allowedPurposeIds List of purpose IDs that the user has given consent to
  */
 function encodePurposeIdsToBits(purposes, allowedPurposeIds = new Set()) {
-  let maxPurposeId = 0;
-  for (let i = 0; i < purposes.length; i += 1) {
-    maxPurposeId = Math.max(maxPurposeId, purposes[i].id);
-  }
-  for (let i = 0; i < allowedPurposeIds.length; i += 1) {
-    maxPurposeId = Math.max(maxPurposeId, allowedPurposeIds[i]);
-  }
-
-  let purposeString = '';
-  for (let id = 1; id <= maxPurposeId; id += 1) {
-    purposeString += (allowedPurposeIds.indexOf(id) !== -1 ? '1' : '0');
-  }
-
-  return purposeString;
+  const purposesIds = purposes.map(purpose => purpose.id).concat(allowedPurposeIds);
+  const maxPurposeId = Math.max.apply(null, purposesIds);
+  return createStringWithAllowances(maxPurposeId, allowedPurposeIds);
 }
 
 /**
  * Convert a list of vendor IDs to ranges
  *
  * @param {object[]} vendors List of vendors from the vendor list (important: this list must to be sorted by ID)
- * @param {integer[]} allowedVendorIds List of vendor IDs that the user has given consent to
+ * @param {number[]} allowedVendorIds List of vendor IDs that the user has given consent to
  */
 function convertVendorsToRanges(vendors, allowedVendorIds) {
   let range = [];
@@ -91,15 +89,9 @@ function convertVendorsToRanges(vendors, allowedVendorIds) {
  * @param {object} vendors
  */
 function getMaxVendorId(vendors) {
+  const idsInList = vendors.map(vendor => vendor.id);
   // Find the max vendor ID from the vendor list
-  let maxVendorId = 0;
-
-  vendors.forEach((vendor) => {
-    if (vendor.id > maxVendorId) {
-      maxVendorId = vendor.id;
-    }
-  });
-  return maxVendorId;
+  return Math.max.apply(null, idsInList);
 }
 /**
  * Encode consent data into a web-safe base64-encoded string
