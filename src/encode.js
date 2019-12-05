@@ -6,8 +6,8 @@ const {
 /**
  * Create a binary string with allowances by list of ids
  *
- * @param {number} maxId
- * @param {number[]} allowedIds
+ * @param {number} maxId Highest vendor ID in the vendor list
+ * @param {number[]} allowedIds List of ids user has given consent to
  */
 function createStringWithAllowances(maxId, allowedIds) {
   let string = '';
