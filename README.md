@@ -1,4 +1,4 @@
-# Transparency and Consent Framework: Consent String SDK (JavaScript)
+# Transparency and Consent Framework v1.1: Consent String SDK (JavaScript)
 
 [![Build Status](https://travis-ci.org/didomi/consent-string.svg?branch=master)](https://travis-ci.org/didomi/consent-string)
 [![Coverage Status](https://coveralls.io/repos/github/didomi/consent-string/badge.svg?branch=master)](https://coveralls.io/github/didomi/consent-string?branch=master)
