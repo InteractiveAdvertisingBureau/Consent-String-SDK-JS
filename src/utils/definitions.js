@@ -75,7 +75,46 @@ const vendorVersionMap = {
   },
 };
 
+/**
+ * Definition of the purposes string encoded format
+ *
+ * From https://github.com/InteractiveAdvertisingBureau/GDPR-Transparency-and-Consent-Framework/blob/43881683aaefae479161319850424fabb87fe6f8/reference/src/lib/cookie/definitions/publisher/version1.js
+ */
+const purposesVersionMap = {
+  /**
+   * Version 1
+   */
+  1: {
+    version: 1,
+    metadataFields: ['cookieVersion', 'created', 'lastUpdated', 'cmpId',
+      'vendorListVersion'],
+    fields: [
+      { name: 'cookieVersion', type: 'int', numBits: 6 },
+      { name: 'created', type: 'date', numBits: 36 },
+      { name: 'lastUpdated', type: 'date', numBits: 36 },
+      { name: 'cmpId', type: 'int', numBits: 12 },
+      { name: 'vendorListVersion', type: 'int', numBits: 12 },
+      { name: 'publisherPurposeVersion', type: 'int', numBits: 12 },
+      { name: 'standardPurposeIdBitString', type: 'bits', numBits: 24 },
+      { name: 'numCustomPurposes', type: 'int', numBits: 6 },
+      {
+        name: 'customPurposeIdBitString',
+        type: 'bits',
+        numBits: (decodedObject) => decodedObject.numCustomPurposes
+      }
+    ]
+  }
+};
+
 module.exports = {
   versionNumBits,
   vendorVersionMap,
+  purposesVersionMap
+};
+
+
+module.exports = {
+  versionNumBits,
+  vendorVersionMap,
+  purposesVersionMap
 };
