@@ -5,10 +5,10 @@ const { vendorVersionMap } = require('./utils/definitions');
  * Regular expression for validating
  */
 const consentLanguageRegexp = /^[a-z]{2}$/;
-let cachedString;
 
 class ConsentString {
   constructor(baseString = null) {
+    this.cachedString = baseString;
     this.maxVendorId = 0;
     this.created = new Date();
     this.lastUpdated = new Date();
@@ -24,7 +24,6 @@ class ConsentString {
 
     // Decode the base string
     if (baseString) {
-      cachedString = baseString;
       Object.assign(this, decodeConsentString(baseString));
     }
   }
@@ -36,8 +35,8 @@ class ConsentString {
      * check for cached string that was passed in.  This avoids having to
      * decode the consent string and even to have a vendorlist
      */
-    if (cachedString && !updateDate) {
-      retr = cachedString;
+    if (this.cachedString && !updateDate) {
+      retr = this.cachedString;
     } else {
       if (!this.vendorList) {
         throw new Error('ConsentString - A vendor list is required to encode a consent string');
@@ -61,7 +60,7 @@ class ConsentString {
         vendorListVersion: this.vendorListVersion,
       });
 
-      cachedString = retr;
+      this.cachedString = retr;
     }
     return retr;
   }
@@ -69,7 +68,7 @@ class ConsentString {
     return this.lastUpdated;
   }
   setLastUpdated(date = null) {
-    cachedString = '';
+    this.cachedString = null;
     if (date) {
       this.lastUpdated = new Date(date);
     } else {
@@ -80,7 +79,7 @@ class ConsentString {
     return this.created;
   }
   setCreated(date = null) {
-    cachedString = '';
+    this.cachedString = null;
     if (date) {
       this.created = new Date(date);
     } else {
@@ -143,7 +142,7 @@ class ConsentString {
 
     // does a vendorList already exist and is it a different version
     if (!this.vendorList || this.vendorListVersion !== vendorList.vendorListVersion) {
-      cachedString = '';
+      this.cachedString = null;
       // Cloning the GVL
       // It's important as we might transform it and don't want to modify objects that we do not own
       this.vendorList = {
@@ -166,7 +165,7 @@ class ConsentString {
   }
   setCmpId(id) {
     if (id !== this.cmpId) {
-      cachedString = '';
+      this.cachedString = null;
       this.cmpId = id;
     }
   }
@@ -175,7 +174,7 @@ class ConsentString {
   }
   setCmpVersion(version) {
     if (version !== this.cmpVersion) {
-      cachedString = '';
+      this.cachedString = null;
       this.cmpVersion = version;
     }
   }
@@ -184,7 +183,7 @@ class ConsentString {
   }
   setConsentScreen(screenId) {
     if (screenId !== this.consentScreen) {
-      cachedString = '';
+      this.cachedString = null;
       this.consentScreen = screenId;
     }
   }
@@ -197,7 +196,7 @@ class ConsentString {
     }
 
     if (language !== this.consentLanguage) {
-      cachedString = '';
+      this.cachedString = null;
       this.consentLanguage = language;
     }
   }
@@ -205,7 +204,7 @@ class ConsentString {
     return this.consentLanguage;
   }
   setPurposesAllowed(purposeIds) {
-    cachedString = '';
+    this.cachedString = null;
     this.allowedPurposeIds = purposeIds;
   }
   getPurposesAllowed() {
@@ -214,7 +213,7 @@ class ConsentString {
   setPurposeAllowed(purposeId, value) {
     const purposeIndex = this.allowedPurposeIds.indexOf(purposeId);
 
-    cachedString = '';
+    this.cachedString = null;
 
     if (value === true) {
       if (purposeIndex === -1) {
@@ -230,7 +229,7 @@ class ConsentString {
     return this.allowedPurposeIds.indexOf(purposeId) !== -1;
   }
   setVendorsAllowed(vendorIds) {
-    cachedString = '';
+    this.cachedString = null;
     this.allowedVendorIds = vendorIds;
   }
   getVendorsAllowed() {
@@ -239,7 +238,7 @@ class ConsentString {
   setVendorAllowed(vendorId, value) {
     const vendorIndex = this.allowedVendorIds.indexOf(vendorId);
 
-    cachedString = '';
+    this.cachedString = null;
     if (value === true) {
       if (vendorIndex === -1) {
         this.allowedVendorIds.push(vendorId);

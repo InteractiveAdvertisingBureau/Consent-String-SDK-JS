@@ -196,4 +196,21 @@ describe('ConsentString', function () {
       ]);
     });
   });
+
+  it('two object do not share the same cache', function () {
+    const consentString1 = new ConsentString();
+    consentString1.setGlobalVendorList(vendorList);
+    Object.assign(consentString1, consentData);
+    consentString1.setCreated(new Date('2018-07-10 PDT'));
+
+    const consentString2 = new ConsentString();
+    consentString2.setGlobalVendorList(vendorList);
+    Object.assign(consentString2, consentData);
+    consentString1.setCreated(new Date('2018-07-12 PDT'));
+
+    expect(consentString1.getConsentString(false))
+      .to
+      .not
+      .equal(consentString2.getConsentString(false));
+  });
 });
