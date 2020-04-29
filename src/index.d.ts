@@ -45,6 +45,7 @@ export class ConsentString {
   private allowedVendorIds: number[];
 
   public getConsentString(updateDate?:boolean): string;
+  public getLastUpdated(): Date;
   public getVersion(): number;
   public getVendorListVersion(): number;
   public setGlobalVendorList(vendorList: VendorList): void;
