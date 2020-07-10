@@ -115,6 +115,6 @@ $RECYCLE.BIN/
 build/
 *.pyc
 *.zip
-dist/
+# dist/
 test.js
 *.tgz
