@@ -1,9 +1,9 @@
-const { ConsentString } = require('./consent-string');
+// const { ConsentString } = require('./consent-string');
 const { decodeConsentString } = require('./decode');
-const { encodeConsentString } = require('./encode');
+// const { encodeConsentString } = require('./encode');
 
 module.exports = {
-  ConsentString,
+  // ConsentString,
   decodeConsentString,
-  encodeConsentString,
+  // encodeConsentString,
 };

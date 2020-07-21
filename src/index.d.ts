@@ -68,4 +68,4 @@ export class ConsentString {
 
 export function decodeConsentString(consentString: string): ConsentString;
 
-export function encodeConsentString(consentData: ConsentString): string;
+// export function encodeConsentString(consentData: ConsentString): string;
